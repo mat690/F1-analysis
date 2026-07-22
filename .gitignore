@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Flask
+instance/
+
+# Node
+frontend/node_modules/
+
+# Vite
+frontend/dist/
+
+# VS Code
+.vscode/
+
+# Environnement
+.env
+
+# Logs
+*.log
+# FastF1 cache
+backend/cache/
+*.sqlite
