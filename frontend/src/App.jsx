@@ -1,26 +1,28 @@
-import { useState } from "react";
 import Plot from "react-plotly.js";
 
 import useTelemetry from "./hooks/useTelemetry";
 import useDominance from "./hooks/useDominance";
 
+import DominanceMap from "./components/DominanceMap";
+
 
 function App() {
 
     // =========================
-    // Sélections
+    // Sélections utilisateur
     // =========================
 
-    const [season, setSeason] = useState(2024);
-    const [race, setRace] = useState("Monaco");
-    const [session, setSession] = useState("R");
+    const season = 2024;
+    const race = "Monaco";
 
-    const [driver1, setDriver1] = useState("LEC");
-    const [driver2, setDriver2] = useState("VER");
+    const session = "R";
+
+    const driver1 = "LEC";
+    const driver2 = "VER";
 
 
     // =========================
-    // Télémétrie pilote 1
+    // Chargement télémétrie
     // =========================
 
     const {
@@ -33,10 +35,6 @@ function App() {
     );
 
 
-    // =========================
-    // Télémétrie pilote 2
-    // =========================
-
     const {
         telemetry: telemetry2
     } = useTelemetry(
@@ -48,7 +46,7 @@ function App() {
 
 
     // =========================
-    // Domination
+    // Chargement domination
     // =========================
 
     const dominance = useDominance(
@@ -61,7 +59,7 @@ function App() {
 
 
     // =========================
-    // Données télémétrie
+    // Données pilote 1
     // =========================
 
     const distance1 = telemetry1.map(
@@ -85,6 +83,10 @@ function App() {
     );
 
 
+    // =========================
+    // Données pilote 2
+    // =========================
+
     const distance2 = telemetry2.map(
         p => p.distance
     );
@@ -107,40 +109,13 @@ function App() {
 
 
     // =========================
-    // Circuit pilote 1
+    // Sécurité affichage
     // =========================
 
-    const circuitX = telemetry1.map(
-        p => p.x
-    );
+    const telemetryAvailable =
+        telemetry1.length > 0 &&
+        telemetry2.length > 0;
 
-    const circuitY = telemetry1.map(
-        p => p.y
-    );
-
-
-    // =========================
-    // Domination
-    // =========================
-
-    const driver1Dominance =
-        Array.isArray(dominance)
-            ? dominance.filter(
-                p => p.delta >= 0
-            )
-            : [];
-
-    const driver2Dominance =
-        Array.isArray(dominance)
-            ? dominance.filter(
-                p => p.delta < 0
-            )
-            : [];
-
-
-    // =========================
-    // Interface
-    // =========================
 
     return (
 
@@ -153,222 +128,111 @@ function App() {
             }}
         >
 
-            <h1
-                style={{
-                    textAlign: "center"
-                }}
-            >
+            {/* ========================= */}
+            {/* TITRE */}
+            {/* ========================= */}
+
+            <h1>
                 🏎️ F1 Analysis
             </h1>
 
+            <p>
+                Comparaison de télémétrie :
+                {" "}
+                <strong>{driver1}</strong>
+                {" "}
+                vs
+                {" "}
+                <strong>{driver2}</strong>
+            </p>
+
+            <p>
+                Grand Prix :
+                {" "}
+                <strong>{race}</strong>
+                {" "}
+                - Saison {season}
+                {" "}
+                - Session {session}
+            </p>
+
+
+            <hr />
+
 
             {/* ========================= */}
-            {/* Sélecteurs */}
+            {/* CHARGEMENT */}
             {/* ========================= */}
 
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    gap: "10px",
-                    flexWrap: "wrap",
-                    marginBottom: "30px"
-                }}
-            >
+            {!telemetryAvailable && (
 
-                <select
-                    value={season}
-                    onChange={
-                        e => setSeason(
-                            Number(e.target.value)
-                        )
-                    }
-                >
-                    <option value={2024}>
-                        2024
-                    </option>
-                </select>
+                <p>
+                    Chargement des données télémétriques...
+                </p>
 
-
-                <select
-                    value={race}
-                    onChange={
-                        e => setRace(
-                            e.target.value
-                        )
-                    }
-                >
-                    <option value="Monaco">
-                        Monaco
-                    </option>
-                </select>
-
-
-                <select
-                    value={session}
-                    onChange={
-                        e => setSession(
-                            e.target.value
-                        )
-                    }
-                >
-
-                    <option value="FP1">
-                        Essais Libres 1
-                    </option>
-
-                    <option value="FP2">
-                        Essais Libres 2
-                    </option>
-
-                    <option value="FP3">
-                        Essais Libres 3
-                    </option>
-
-                    <option value="Q">
-                        Qualifications
-                    </option>
-
-                    <option value="R">
-                        Course
-                    </option>
-
-                </select>
-
-
-                <select
-                    value={driver1}
-                    onChange={
-                        e => setDriver1(
-                            e.target.value
-                        )
-                    }
-                >
-
-                    <option value="LEC">
-                        Charles Leclerc
-                    </option>
-
-                    <option value="VER">
-                        Max Verstappen
-                    </option>
-
-                    <option value="NOR">
-                        Lando Norris
-                    </option>
-
-                    <option value="PIA">
-                        Oscar Piastri
-                    </option>
-
-                    <option value="HAM">
-                        Lewis Hamilton
-                    </option>
-
-                    <option value="RUS">
-                        George Russell
-                    </option>
-
-                </select>
-
-
-                <select
-                    value={driver2}
-                    onChange={
-                        e => setDriver2(
-                            e.target.value
-                        )
-                    }
-                >
-
-                    <option value="VER">
-                        Max Verstappen
-                    </option>
-
-                    <option value="LEC">
-                        Charles Leclerc
-                    </option>
-
-                    <option value="NOR">
-                        Lando Norris
-                    </option>
-
-                    <option value="PIA">
-                        Oscar Piastri
-                    </option>
-
-                    <option value="HAM">
-                        Lewis Hamilton
-                    </option>
-
-                    <option value="RUS">
-                        George Russell
-                    </option>
-
-                </select>
-
-            </div>
+            )}
 
 
             {/* ========================= */}
             {/* VITESSE */}
             {/* ========================= */}
 
-            <h2>
-                📡 Vitesse — {driver1} vs {driver2}
-            </h2>
+            {telemetryAvailable && (
 
+                <>
 
-            {
-                telemetry1.length === 0 ||
-                telemetry2.length === 0 ? (
-
-                    <p>
-                        Chargement de la télémétrie...
-                    </p>
-
-                ) : (
+                    <h2>
+                        Vitesse
+                    </h2>
 
                     <Plot
 
                         data={[
+
                             {
                                 x: distance1,
                                 y: speed1,
+
                                 type: "scatter",
                                 mode: "lines",
+
                                 name: driver1
                             },
 
                             {
                                 x: distance2,
                                 y: speed2,
+
                                 type: "scatter",
                                 mode: "lines",
+
                                 name: driver2
                             }
+
                         ]}
 
                         layout={{
+
                             title:
                                 `Vitesse ${driver1} vs ${driver2}`,
 
-                            autosize: true,
-
-                            height: 430,
-
                             xaxis: {
-                                title:
-                                    "Distance (m)"
+                                title: "Distance (m)"
                             },
 
                             yaxis: {
-                                title:
-                                    "Vitesse (km/h)"
+                                title: "Vitesse (km/h)"
                             },
 
-                            hovermode:
-                                "x unified"
+                            height: 450,
+
+                            margin: {
+                                l: 70,
+                                r: 30,
+                                t: 60,
+                                b: 60
+                            }
+
                         }}
 
                         style={{
@@ -377,63 +241,70 @@ function App() {
 
                         useResizeHandler={true}
 
+                        config={{
+                            responsive: true
+                        }}
+
                     />
 
-                )
-            }
 
+                    {/* ========================= */}
+                    {/* ACCÉLÉRATEUR */}
+                    {/* ========================= */}
 
-            {/* ========================= */}
-            {/* ACCELERATEUR */}
-            {/* ========================= */}
-
-            <h2>
-                Accélérateur
-            </h2>
-
-
-            {
-                telemetry1.length > 0 &&
-                telemetry2.length > 0 && (
+                    <h2>
+                        Accélérateur
+                    </h2>
 
                     <Plot
 
                         data={[
+
                             {
                                 x: distance1,
                                 y: throttle1,
+
                                 type: "scatter",
                                 mode: "lines",
+
                                 name: driver1
                             },
 
                             {
                                 x: distance2,
                                 y: throttle2,
+
                                 type: "scatter",
                                 mode: "lines",
+
                                 name: driver2
                             }
+
                         ]}
 
                         layout={{
-                            autosize: true,
 
-                            height: 300,
+                            title:
+                                `Accélérateur ${driver1} vs ${driver2}`,
 
                             xaxis: {
-                                title:
-                                    "Distance (m)"
+                                title: "Distance (m)"
                             },
 
                             yaxis: {
-                                title:
-                                    "Accélérateur (%)",
-                                range: [0, 100]
+                                title: "Accélérateur (%)",
+                                range: [0, 105]
                             },
 
-                            hovermode:
-                                "x unified"
+                            height: 350,
+
+                            margin: {
+                                l: 70,
+                                r: 30,
+                                t: 60,
+                                b: 60
+                            }
+
                         }}
 
                         style={{
@@ -442,63 +313,80 @@ function App() {
 
                         useResizeHandler={true}
 
+                        config={{
+                            responsive: true
+                        }}
+
                     />
 
-                )
-            }
 
+                    {/* ========================= */}
+                    {/* FREIN */}
+                    {/* ========================= */}
 
-            {/* ========================= */}
-            {/* FREIN */}
-            {/* ========================= */}
-
-            <h2>
-                Frein
-            </h2>
-
-
-            {
-                telemetry1.length > 0 &&
-                telemetry2.length > 0 && (
+                    <h2>
+                        Frein
+                    </h2>
 
                     <Plot
 
                         data={[
+
                             {
                                 x: distance1,
                                 y: brake1,
+
                                 type: "scatter",
                                 mode: "lines",
+
                                 name: driver1
                             },
 
                             {
                                 x: distance2,
                                 y: brake2,
+
                                 type: "scatter",
                                 mode: "lines",
+
                                 name: driver2
                             }
+
                         ]}
 
                         layout={{
-                            autosize: true,
 
-                            height: 250,
+                            title:
+                                `Freinage ${driver1} vs ${driver2}`,
 
                             xaxis: {
-                                title:
-                                    "Distance (m)"
+                                title: "Distance (m)"
                             },
 
                             yaxis: {
-                                title:
-                                    "Frein",
-                                range: [0, 100]
+                                title: "Frein",
+                                range: [0, 110],
+
+                                tickvals: [
+                                    0,
+                                    100
+                                ],
+
+                                ticktext: [
+                                    "Non",
+                                    "Oui"
+                                ]
                             },
 
-                            hovermode:
-                                "x unified"
+                            height: 300,
+
+                            margin: {
+                                l: 70,
+                                r: 30,
+                                t: 60,
+                                b: 60
+                            }
+
                         }}
 
                         style={{
@@ -507,125 +395,69 @@ function App() {
 
                         useResizeHandler={true}
 
+                        config={{
+                            responsive: true
+                        }}
+
                     />
 
-                )
-            }
 
+                    {/* ========================= */}
+                    {/* DRS */}
+                    {/* ========================= */}
 
-            {/* ========================= */}
-            {/* DRS */}
-            {/* ========================= */}
-
-            <h2>
-                DRS
-            </h2>
-
-
-            {
-                telemetry1.length > 0 &&
-                telemetry2.length > 0 && (
+                    <h2>
+                        DRS
+                    </h2>
 
                     <Plot
 
                         data={[
+
                             {
                                 x: distance1,
                                 y: drs1,
+
                                 type: "scatter",
                                 mode: "lines",
+
                                 name: driver1
                             },
 
                             {
                                 x: distance2,
                                 y: drs2,
+
                                 type: "scatter",
                                 mode: "lines",
+
                                 name: driver2
                             }
+
                         ]}
 
                         layout={{
-                            autosize: true,
 
-                            height: 250,
-
-                            xaxis: {
-                                title:
-                                    "Distance (m)"
-                            },
-
-                            yaxis: {
-                                title:
-                                    "DRS"
-                            },
-
-                            hovermode:
-                                "x unified"
-                        }}
-
-                        style={{
-                            width: "100%"
-                        }}
-
-                        useResizeHandler={true}
-
-                    />
-
-                )
-            }
-
-
-            {/* ========================= */}
-            {/* CIRCUIT */}
-            {/* ========================= */}
-
-            <h2>
-                🗺️ Circuit
-            </h2>
-
-
-            {
-                telemetry1.length === 0 ? (
-
-                    <p>
-                        Pas de données circuit.
-                    </p>
-
-                ) : (
-
-                    <Plot
-
-                        data={[
-                            {
-                                x: circuitX,
-                                y: circuitY,
-
-                                type: "scatter",
-
-                                mode: "lines",
-
-                                name: driver1
-                            }
-                        ]}
-
-                        layout={{
                             title:
-                                `Tour rapide ${driver1}`,
-
-                            autosize: true,
-
-                            height: 550,
+                                `DRS ${driver1} vs ${driver2}`,
 
                             xaxis: {
-                                visible: false
+                                title: "Distance (m)"
                             },
 
                             yaxis: {
-                                visible: false,
-                                scaleanchor: "x"
+                                title: "Valeur DRS"
+                            },
+
+                            height: 300,
+
+                            margin: {
+                                l: 70,
+                                r: 30,
+                                t: 60,
+                                b: 60
                             }
+
                         }}
 
                         style={{
@@ -634,133 +466,34 @@ function App() {
 
                         useResizeHandler={true}
 
+                        config={{
+                            responsive: true
+                        }}
+
                     />
 
-                )
-            }
+                </>
+
+            )}
+
+
+            <hr />
 
 
             {/* ========================= */}
             {/* DOMINATION */}
             {/* ========================= */}
 
-            <h2>
-                🏁 Domination {driver1} vs {driver2}
-            </h2>
+            <DominanceMap
 
+                data={dominance}
 
-            {
-                dominance.length === 0 ? (
+                driver1={driver1}
 
-                    <p>
-                        Chargement de la domination...
-                    </p>
+                driver2={driver2}
 
-                ) : (
+            />
 
-                    <>
-
-                        <p>
-                            🟢 {driver1} plus rapide :
-                            {" "}
-                            {driver1Dominance.length}
-                            {" "}
-                            points
-                        </p>
-
-                        <p>
-                            🔴 {driver2} plus rapide :
-                            {" "}
-                            {driver2Dominance.length}
-                            {" "}
-                            points
-                        </p>
-
-
-                        <Plot
-
-                            data={[
-                                {
-                                    x:
-                                        driver1Dominance.map(
-                                            p => p.x
-                                        ),
-
-                                    y:
-                                        driver1Dominance.map(
-                                            p => p.y
-                                        ),
-
-                                    type:
-                                        "scatter",
-
-                                    mode:
-                                        "markers",
-
-                                    name:
-                                        driver1,
-
-                                    marker: {
-                                        size: 5
-                                    }
-                                },
-
-                                {
-                                    x:
-                                        driver2Dominance.map(
-                                            p => p.x
-                                        ),
-
-                                    y:
-                                        driver2Dominance.map(
-                                            p => p.y
-                                        ),
-
-                                    type:
-                                        "scatter",
-
-                                    mode:
-                                        "markers",
-
-                                    name:
-                                        driver2,
-
-                                    marker: {
-                                        size: 5
-                                    }
-                                }
-                            ]}
-
-                            layout={{
-                                title:
-                                    `${driver1} vs ${driver2}`,
-
-                                autosize: true,
-
-                                height: 600,
-
-                                xaxis: {
-                                    visible: false
-                                },
-
-                                yaxis: {
-                                    visible: false,
-                                    scaleanchor: "x"
-                                }
-                            }}
-
-                            style={{
-                                width: "100%"
-                            }}
-
-                            useResizeHandler={true}
-
-                        />
-
-                    </>
-
-                )
-            }
 
         </div>
 

@@ -7,163 +7,250 @@ function DominanceMap({
     driver2
 }) {
 
+    // =========================
+    // Vérification
+    // =========================
 
-    if(!data || data.length === 0){
-
+    if (!Array.isArray(data) || data.length === 0) {
         return (
             <p>
                 Pas de données de domination
             </p>
         );
-
     }
 
 
-
-    /*
-        On sépare les points
-        selon le pilote dominant
-    */
-
+    // =========================
+    // Séparation des pilotes
+    // =========================
 
     const d1 = data.filter(
-        p => p.winner === driver1
+        p => p.delta >= 0
     );
-
 
     const d2 = data.filter(
-        p => p.winner === driver2
+        p => p.delta < 0
     );
 
+
+    // =========================
+    // Infos affichées au survol
+    // =========================
+
+    const hoverDriver1 = d1.map(
+        p => [
+            p.distance,
+            p.vitesse1,
+            p.vitesse2,
+            p.delta
+        ]
+    );
+
+
+    const hoverDriver2 = d2.map(
+        p => [
+            p.distance,
+            p.vitesse1,
+            p.vitesse2,
+            p.delta
+        ]
+    );
 
 
     return (
 
-        <Plot
+        <div>
 
-            data={[
-
-
-                // PILOTE 1
-
-                {
-                    x: d1.map(
-                        p => p.X
-                    ),
-
-                    y: d1.map(
-                        p => p.Y
-                    ),
+            <h2>
+                🏁 Domination {driver1} vs {driver2}
+            </h2>
 
 
-                    mode:"markers+lines",
+            <p>
+                🟢 {driver1} plus rapide :
+                {" "}
+                <strong>
+                    {d1.length}
+                </strong>
+                {" "}
+                points
+            </p>
 
 
-                    name:driver1,
+            <p>
+                🔴 {driver2} plus rapide :
+                {" "}
+                <strong>
+                    {d2.length}
+                </strong>
+                {" "}
+                points
+            </p>
 
 
-                    line:{
-                        width:6
+            <Plot
+
+                data={[
+
+                    // =========================
+                    // Tracé du circuit
+                    // =========================
+
+                    {
+                        x: data.map(
+                            p => p.x
+                        ),
+
+                        y: data.map(
+                            p => p.y
+                        ),
+
+                        mode: "lines",
+
+                        type: "scatter",
+
+                        name: "Circuit",
+
+                        hoverinfo: "skip",
+
+                        line: {
+                            width: 3,
+                            color: "#555"
+                        }
                     },
 
 
-                    marker:{
-                        size:5
-                    }
+                    // =========================
+                    // Pilote 1
+                    // =========================
 
-                },
+                    {
+                        x: d1.map(
+                            p => p.x
+                        ),
 
+                        y: d1.map(
+                            p => p.y
+                        ),
 
+                        mode: "markers",
 
-                // PILOTE 2
+                        type: "scatter",
 
-                {
-                    x: d2.map(
-                        p => p.X
-                    ),
+                        name: driver1,
 
-                    y: d2.map(
-                        p => p.Y
-                    ),
+                        customdata: hoverDriver1,
 
+                        marker: {
+                            size: 8,
+                            color: "#00c853"
+                        },
 
-                    mode:"markers+lines",
-
-
-                    name:driver2,
-
-
-                    line:{
-                        width:6
+                        hovertemplate:
+                            `<b>${driver1} plus rapide</b><br>` +
+                            "Distance : %{customdata[0]:.0f} m<br>" +
+                            `${driver1} : %{customdata[1]:.1f} km/h<br>` +
+                            `${driver2} : %{customdata[2]:.1f} km/h<br>` +
+                            "Delta : +%{customdata[3]:.1f} km/h" +
+                            "<extra></extra>"
                     },
 
 
-                    marker:{
-                        size:5
+                    // =========================
+                    // Pilote 2
+                    // =========================
+
+                    {
+                        x: d2.map(
+                            p => p.x
+                        ),
+
+                        y: d2.map(
+                            p => p.y
+                        ),
+
+                        mode: "markers",
+
+                        type: "scatter",
+
+                        name: driver2,
+
+                        customdata: hoverDriver2,
+
+                        marker: {
+                            size: 8,
+                            color: "#ff1744"
+                        },
+
+                        hovertemplate:
+                            `<b>${driver2} plus rapide</b><br>` +
+                            "Distance : %{customdata[0]:.0f} m<br>" +
+                            `${driver1} : %{customdata[1]:.1f} km/h<br>` +
+                            `${driver2} : %{customdata[2]:.1f} km/h<br>` +
+                            "Delta : %{customdata[3]:.1f} km/h" +
+                            "<extra></extra>"
                     }
 
-                }
+                ]}
 
 
-            ]}
+                layout={{
+
+                    title:
+                        `Carte de domination ${driver1} vs ${driver2}`,
+
+                    autosize: true,
+
+                    height: 650,
 
 
-
-            layout={{
-
-
-                title:
-                `Carte domination ${driver1} vs ${driver2}`,
+                    xaxis: {
+                        visible: false
+                    },
 
 
-                width:800,
-
-                height:700,
-
-
-                xaxis:{
-
-                    visible:false
-
-                },
+                    yaxis: {
+                        visible: false,
+                        scaleanchor: "x"
+                    },
 
 
-                yaxis:{
-
-                    visible:false,
-
-                    scaleanchor:"x"
-
-                },
+                    legend: {
+                        orientation: "h",
+                        x: 0.5,
+                        xanchor: "center"
+                    },
 
 
-                legend:{
-
-                    orientation:"h"
-
-                },
-
-
-                margin:{
-
-                    l:20,
-                    r:20,
-                    t:50,
-                    b:20
-
-                }
-
-            }}
+                    margin: {
+                        l: 20,
+                        r: 20,
+                        t: 60,
+                        b: 20
+                    },
 
 
-            config={{
+                    hovermode: "closest"
 
-                displayModeBar:false
-
-            }}
+                }}
 
 
-        />
+                style={{
+                    width: "100%"
+                }}
+
+
+                useResizeHandler={true}
+
+
+                config={{
+                    displayModeBar: false,
+                    responsive: true
+                }}
+
+            />
+
+        </div>
 
     );
 
