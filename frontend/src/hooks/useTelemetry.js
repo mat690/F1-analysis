@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
+
 import api from "../services/api";
+
 
 export default function useTelemetry(
     season,
@@ -7,12 +12,30 @@ export default function useTelemetry(
     session,
     driver
 ) {
+
     const [telemetry, setTelemetry] = useState([]);
-    const [index, setIndex] = useState(0);
+
+    const [loading, setLoading] = useState(false);
+
+    const [error, setError] = useState(null);
+
 
     useEffect(() => {
 
+        let cancelled = false;
+
+
         async function loadTelemetry() {
+
+            // On efface les anciennes données
+            setTelemetry([]);
+
+            // Début du chargement
+            setLoading(true);
+
+            // On efface l'ancienne erreur
+            setError(null);
+
 
             try {
 
@@ -20,38 +43,77 @@ export default function useTelemetry(
                     `/telemetry/${season}/${race}/${session}/${driver}`
                 );
 
+
+                if (cancelled) {
+                    return;
+                }
+
+
                 const rawTelemetry =
-                    Array.isArray(response.data?.telemetrie)
+                    Array.isArray(
+                        response.data?.telemetrie
+                    )
                         ? response.data.telemetrie
                         : [];
 
+
                 const formattedTelemetry =
-                    rawTelemetry.map(point => ({
-                        distance: point.distance,
-                        vitesse: point.speed,
-                        accelerateur: point.throttle,
-                        frein: point.brake,
-                        drs: point.drs,
-                        rapport: point.gear,
-                        x: point.x,
-                        y: point.y
-                    }));
+                    rawTelemetry.map(
+                        point => ({
+                            distance: point.distance,
+                            vitesse: point.speed,
+                            accelerateur: point.throttle,
+                            frein: point.brake,
+                            drs: point.drs,
+                            rapport: point.gear,
+                            x: point.x,
+                            y: point.y
+                        })
+                    );
 
-                setTelemetry(formattedTelemetry);
-                setIndex(0);
 
-            } catch (error) {
+                setTelemetry(
+                    formattedTelemetry
+                );
+
+
+                if (
+                    formattedTelemetry.length === 0
+                ) {
+                    setError(
+                        "Aucune télémétrie disponible."
+                    );
+                }
+
+            } catch (err) {
+
+                if (cancelled) {
+                    return;
+                }
+
 
                 console.error(
                     "Erreur télémétrie :",
-                    error
+                    err
                 );
 
+
                 setTelemetry([]);
-                setIndex(0);
+
+                setError(
+                    "Impossible de charger la télémétrie."
+                );
+
+            } finally {
+
+                if (!cancelled) {
+                    setLoading(false);
+                }
+
             }
 
         }
+
 
         if (
             season &&
@@ -62,6 +124,12 @@ export default function useTelemetry(
             loadTelemetry();
         }
 
+
+        return () => {
+            cancelled = true;
+        };
+
+
     }, [
         season,
         race,
@@ -69,9 +137,10 @@ export default function useTelemetry(
         driver
     ]);
 
+
     return {
         telemetry,
-        index,
-        setIndex
+        loading,
+        error
     };
 }

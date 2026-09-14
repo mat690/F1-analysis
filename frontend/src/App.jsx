@@ -120,28 +120,31 @@ function App() {
     // TÉLÉMÉTRIE PILOTE 1
     // =========================
 
-    const {
-        telemetry: telemetry1
-    } = useTelemetry(
-        season,
-        race,
-        session,
-        driver1
-    );
-
+ const {
+    telemetry: telemetry1,
+    loading: loading1,
+    error: error1
+} = useTelemetry(
+    season,
+    race,
+    session,
+    driver1
+);
 
     // =========================
     // TÉLÉMÉTRIE PILOTE 2
     // =========================
 
-    const {
-        telemetry: telemetry2
-    } = useTelemetry(
-        season,
-        race,
-        session,
-        driver2
-    );
+  const {
+    telemetry: telemetry2,
+    loading: loading2,
+    error: error2
+} = useTelemetry(
+    season,
+    race,
+    session,
+    driver2
+);
 
 
     // =========================
@@ -206,12 +209,17 @@ function App() {
     // =========================
     // CHARGEMENT
     // =========================
+const telemetryLoading =
+    loading1 || loading2;
 
-    const telemetryAvailable =
-        telemetry1.length > 0 &&
-        telemetry2.length > 0;
+const telemetryError =
+    error1 || error2;
 
-
+const telemetryAvailable =
+    !telemetryLoading &&
+    !telemetryError &&
+    telemetry1.length > 0 &&
+    telemetry2.length > 0;
     return (
 
         <div
@@ -515,17 +523,30 @@ function App() {
             {/* CHARGEMENT */}
             {/* ========================= */}
 
-            {!telemetryAvailable && (
+           {telemetryLoading && (
 
-                <p
-                    style={{
-                        textAlign: "center"
-                    }}
-                >
-                    Chargement des données FastF1...
-                </p>
+    <p
+        style={{
+            textAlign: "center"
+        }}
+    >
+        ⏳ Chargement de {race}...
+    </p>
 
-            )}
+)}
+
+
+{telemetryError && !telemetryLoading && (
+
+    <p
+        style={{
+            textAlign: "center"
+        }}
+    >
+        ⚠️ {telemetryError}
+    </p>
+
+)}
 
 
             {/* ========================= */}
