@@ -309,7 +309,15 @@ function App() {
             ).toFixed(1)
             : 0;
 
+const deltaDistance =
+    dominance.map(
+        point => point.distance
+    );
 
+const deltaSpeed =
+    dominance.map(
+        point => point.delta
+    );
     /*
     =========================
     THEME PLOTLY
@@ -806,7 +814,73 @@ function App() {
                         />
 
                     </div>
+{/* DELTA DE VITESSE */}
 
+<div className="card">
+
+    <Plot
+        data={[
+            {
+                x: deltaDistance,
+                y: deltaSpeed,
+                type: "scatter",
+                mode: "lines",
+                name: `Delta ${driver1} - ${driver2}`,
+
+                fill: "tozeroy",
+
+                hovertemplate:
+                    "Distance : %{x:.0f} m<br>" +
+                    "Delta : %{y:.1f} km/h" +
+                    "<extra></extra>"
+            }
+        ]}
+        layout={{
+            ...commonLayout,
+
+            title:
+                `Delta de vitesse — ${driver1} vs ${driver2}`,
+
+            height: 380,
+
+            yaxis: {
+                title:
+                    `Δ vitesse ${driver1} - ${driver2} (km/h)`,
+
+                gridcolor: "#333333",
+
+                zerolinecolor: "#ffffff",
+
+                zerolinewidth: 2
+            },
+
+            annotations: [
+                {
+                    x: 1,
+                    y: 1,
+                    xref: "paper",
+                    yref: "paper",
+
+                    text:
+                        `+ = avantage ${driver1}`,
+
+                    showarrow: false,
+
+                    font: {
+                        color: "#aaaaaa",
+                        size: 12
+                    }
+                }
+            ]
+        }}
+        style={{
+            width: "100%"
+        }}
+        useResizeHandler={true}
+        config={commonConfig}
+    />
+
+</div>
 
                     {/* ACCELERATEUR */}
 
