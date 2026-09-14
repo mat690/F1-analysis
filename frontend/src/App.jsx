@@ -1,10 +1,9 @@
+import { useState } from "react";
 import Plot from "react-plotly.js";
 
 import useTelemetry from "./hooks/useTelemetry";
 import useDominance from "./hooks/useDominance";
-
 import DominanceMap from "./components/DominanceMap";
-
 
 function App() {
 
@@ -12,13 +11,12 @@ function App() {
     // Sélections utilisateur
     // =========================
 
-    const season = 2024;
-    const race = "Monaco";
+  const [season, setSeason] = useState(2024);
+const [race, setRace] = useState("Monaco");
+const [session, setSession] = useState("R");
 
-    const session = "R";
-
-    const driver1 = "LEC";
-    const driver2 = "VER";
+const [driver1, setDriver1] = useState("LEC");
+const [driver2, setDriver2] = useState("VER");
 
 
     // =========================
@@ -135,7 +133,157 @@ function App() {
             <h1>
                 🏎️ F1 Analysis
             </h1>
+<div
+    style={{
+        display: "flex",
+        gap: "15px",
+        flexWrap: "wrap",
+        marginBottom: "25px"
+    }}
+>
 
+    {/* SAISON */}
+
+    <div>
+        <label>Saison</label>
+
+        <br />
+
+        <select
+            value={season}
+            onChange={(e) =>
+                setSeason(Number(e.target.value))
+            }
+        >
+            <option value={2024}>2024</option>
+            <option value={2023}>2023</option>
+            <option value={2022}>2022</option>
+        </select>
+    </div>
+
+
+    {/* GRAND PRIX */}
+
+    <div>
+        <label>Grand Prix</label>
+
+        <br />
+
+        <select
+            value={race}
+            onChange={(e) =>
+                setRace(e.target.value)
+            }
+        >
+            <option value="Monaco">
+                Monaco
+            </option>
+
+            <option value="Monza">
+                Italie - Monza
+            </option>
+
+            <option value="Silverstone">
+                Grande-Bretagne
+            </option>
+
+            <option value="Spa">
+                Belgique - Spa
+            </option>
+
+            <option value="Suzuka">
+                Japon - Suzuka
+            </option>
+        </select>
+    </div>
+
+
+    {/* SESSION */}
+
+    <div>
+        <label>Session</label>
+
+        <br />
+
+        <select
+            value={session}
+            onChange={(e) =>
+                setSession(e.target.value)
+            }
+        >
+            <option value="FP1">
+                Essais libres 1
+            </option>
+
+            <option value="FP2">
+                Essais libres 2
+            </option>
+
+            <option value="FP3">
+                Essais libres 3
+            </option>
+
+            <option value="Q">
+                Qualifications
+            </option>
+
+            <option value="R">
+                Course
+            </option>
+        </select>
+    </div>
+
+
+    {/* PILOTE 1 */}
+
+    <div>
+        <label>Pilote 1</label>
+
+        <br />
+
+        <select
+            value={driver1}
+            onChange={(e) =>
+                setDriver1(e.target.value)
+            }
+        >
+            <option value="LEC">Charles Leclerc</option>
+            <option value="VER">Max Verstappen</option>
+            <option value="NOR">Lando Norris</option>
+            <option value="PIA">Oscar Piastri</option>
+            <option value="HAM">Lewis Hamilton</option>
+            <option value="RUS">George Russell</option>
+            <option value="SAI">Carlos Sainz</option>
+            <option value="ALO">Fernando Alonso</option>
+        </select>
+    </div>
+
+
+    {/* PILOTE 2 */}
+
+    <div>
+        <label>Pilote 2</label>
+
+        <br />
+
+        <select
+            value={driver2}
+            onChange={(e) =>
+                setDriver2(e.target.value)
+            }
+        >
+            <option value="VER">Max Verstappen</option>
+            <option value="LEC">Charles Leclerc</option>
+            <option value="NOR">Lando Norris</option>
+            <option value="PIA">Oscar Piastri</option>
+            <option value="HAM">Lewis Hamilton</option>
+            <option value="RUS">George Russell</option>
+            <option value="SAI">Carlos Sainz</option>
+            <option value="ALO">Fernando Alonso</option>
+        </select>
+    </div>
+
+</div>
             <p>
                 Comparaison de télémétrie :
                 {" "}
