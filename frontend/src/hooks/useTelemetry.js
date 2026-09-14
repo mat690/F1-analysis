@@ -12,36 +12,55 @@ export default function useTelemetry(
 
     useEffect(() => {
 
-        if (!season || !race || !session || !driver) {
-            setTelemetry([]);
-            return;
-        }
+        async function loadTelemetry() {
 
-        api
-            .get(
-                `/telemetry/${season}/${race}/${session}/${driver}`
-            )
-            .then((res) => {
+            try {
 
-                const points = Array.isArray(res.data?.points)
-                    ? res.data.points
-                    : [];
+                const response = await api.get(
+                    `/telemetry/${season}/${race}/${session}/${driver}`
+                );
 
-                setTelemetry(points);
+                const rawTelemetry =
+                    Array.isArray(response.data?.telemetrie)
+                        ? response.data.telemetrie
+                        : [];
+
+                const formattedTelemetry =
+                    rawTelemetry.map(point => ({
+                        distance: point.distance,
+                        vitesse: point.speed,
+                        accelerateur: point.throttle,
+                        frein: point.brake,
+                        drs: point.drs,
+                        rapport: point.gear,
+                        x: point.x,
+                        y: point.y
+                    }));
+
+                setTelemetry(formattedTelemetry);
                 setIndex(0);
 
-            })
-            .catch((error) => {
+            } catch (error) {
 
                 console.error(
-                    "Erreur récupération télémétrie :",
+                    "Erreur télémétrie :",
                     error
                 );
 
                 setTelemetry([]);
                 setIndex(0);
+            }
 
-            });
+        }
+
+        if (
+            season &&
+            race &&
+            session &&
+            driver
+        ) {
+            loadTelemetry();
+        }
 
     }, [
         season,

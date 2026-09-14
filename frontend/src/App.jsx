@@ -7,6 +7,10 @@ import useDominance from "./hooks/useDominance";
 
 function App() {
 
+    // =========================
+    // Sélections
+    // =========================
+
     const [season, setSeason] = useState(2024);
     const [race, setRace] = useState("Monaco");
     const [session, setSession] = useState("R");
@@ -16,11 +20,11 @@ function App() {
 
 
     // =========================
-    // API
+    // Télémétrie pilote 1
     // =========================
 
     const {
-        telemetry
+        telemetry: telemetry1
     } = useTelemetry(
         season,
         race,
@@ -28,6 +32,24 @@ function App() {
         driver1
     );
 
+
+    // =========================
+    // Télémétrie pilote 2
+    // =========================
+
+    const {
+        telemetry: telemetry2
+    } = useTelemetry(
+        season,
+        race,
+        session,
+        driver2
+    );
+
+
+    // =========================
+    // Domination
+    // =========================
 
     const dominance = useDominance(
         season,
@@ -39,31 +61,60 @@ function App() {
 
 
     // =========================
-    // Télémétrie
+    // Données télémétrie
     // =========================
 
-    const telemetryDistance = telemetry.map(
+    const distance1 = telemetry1.map(
         p => p.distance
     );
 
-    const telemetrySpeed = telemetry.map(
+    const speed1 = telemetry1.map(
         p => p.vitesse
     );
 
-    const telemetryThrottle = telemetry.map(
+    const throttle1 = telemetry1.map(
         p => p.accelerateur
     );
 
+    const brake1 = telemetry1.map(
+        p => p.frein ? 100 : 0
+    );
+
+    const drs1 = telemetry1.map(
+        p => p.drs
+    );
+
+
+    const distance2 = telemetry2.map(
+        p => p.distance
+    );
+
+    const speed2 = telemetry2.map(
+        p => p.vitesse
+    );
+
+    const throttle2 = telemetry2.map(
+        p => p.accelerateur
+    );
+
+    const brake2 = telemetry2.map(
+        p => p.frein ? 100 : 0
+    );
+
+    const drs2 = telemetry2.map(
+        p => p.drs
+    );
+
 
     // =========================
-    // Carte circuit télémétrie
+    // Circuit pilote 1
     // =========================
 
-    const telemetryX = telemetry.map(
+    const circuitX = telemetry1.map(
         p => p.x
     );
 
-    const telemetryY = telemetry.map(
+    const circuitY = telemetry1.map(
         p => p.y
     );
 
@@ -73,28 +124,40 @@ function App() {
     // =========================
 
     const driver1Dominance =
-        dominance.filter(
-            p => p.delta >= 0
-        );
+        Array.isArray(dominance)
+            ? dominance.filter(
+                p => p.delta >= 0
+            )
+            : [];
 
     const driver2Dominance =
-        dominance.filter(
-            p => p.delta < 0
-        );
+        Array.isArray(dominance)
+            ? dominance.filter(
+                p => p.delta < 0
+            )
+            : [];
 
+
+    // =========================
+    // Interface
+    // =========================
 
     return (
 
         <div
             style={{
                 maxWidth: "1200px",
-                margin: "auto",
+                margin: "0 auto",
                 padding: "20px",
-                fontFamily: "Arial"
+                fontFamily: "Arial, sans-serif"
             }}
         >
 
-            <h1>
+            <h1
+                style={{
+                    textAlign: "center"
+                }}
+            >
                 🏎️ F1 Analysis
             </h1>
 
@@ -106,6 +169,7 @@ function App() {
             <div
                 style={{
                     display: "flex",
+                    justifyContent: "center",
                     gap: "10px",
                     flexWrap: "wrap",
                     marginBottom: "30px"
@@ -148,6 +212,7 @@ function App() {
                         )
                     }
                 >
+
                     <option value="FP1">
                         Essais Libres 1
                     </option>
@@ -167,6 +232,7 @@ function App() {
                     <option value="R">
                         Course
                     </option>
+
                 </select>
 
 
@@ -178,6 +244,7 @@ function App() {
                         )
                     }
                 >
+
                     <option value="LEC">
                         Charles Leclerc
                     </option>
@@ -189,6 +256,19 @@ function App() {
                     <option value="NOR">
                         Lando Norris
                     </option>
+
+                    <option value="PIA">
+                        Oscar Piastri
+                    </option>
+
+                    <option value="HAM">
+                        Lewis Hamilton
+                    </option>
+
+                    <option value="RUS">
+                        George Russell
+                    </option>
+
                 </select>
 
 
@@ -200,6 +280,7 @@ function App() {
                         )
                     }
                 >
+
                     <option value="VER">
                         Max Verstappen
                     </option>
@@ -211,22 +292,36 @@ function App() {
                     <option value="NOR">
                         Lando Norris
                     </option>
+
+                    <option value="PIA">
+                        Oscar Piastri
+                    </option>
+
+                    <option value="HAM">
+                        Lewis Hamilton
+                    </option>
+
+                    <option value="RUS">
+                        George Russell
+                    </option>
+
                 </select>
 
             </div>
 
 
             {/* ========================= */}
-            {/* TELEMETRIE */}
+            {/* VITESSE */}
             {/* ========================= */}
 
             <h2>
-                📡 Télémétrie {driver1}
+                📡 Vitesse — {driver1} vs {driver2}
             </h2>
 
 
             {
-                telemetry.length === 0 ? (
+                telemetry1.length === 0 ||
+                telemetry2.length === 0 ? (
 
                     <p>
                         Chargement de la télémétrie...
@@ -234,97 +329,312 @@ function App() {
 
                 ) : (
 
-                    <>
-                        <Plot
+                    <Plot
 
-                            data={[
-                                {
-                                    x: telemetryDistance,
-                                    y: telemetrySpeed,
-                                    type: "scatter",
-                                    mode: "lines",
-                                    name: "Vitesse"
-                                },
+                        data={[
+                            {
+                                x: distance1,
+                                y: speed1,
+                                type: "scatter",
+                                mode: "lines",
+                                name: driver1
+                            },
 
-                                {
-                                    x: telemetryDistance,
-                                    y: telemetryThrottle,
-                                    type: "scatter",
-                                    mode: "lines",
-                                    name: "Accélérateur"
-                                }
-                            ]}
+                            {
+                                x: distance2,
+                                y: speed2,
+                                type: "scatter",
+                                mode: "lines",
+                                name: driver2
+                            }
+                        ]}
 
-                            layout={{
-                                title: "Télémétrie",
-                                autosize: true,
-                                height: 450,
+                        layout={{
+                            title:
+                                `Vitesse ${driver1} vs ${driver2}`,
 
-                                xaxis: {
-                                    title: "Distance"
-                                },
+                            autosize: true,
 
-                                yaxis: {
-                                    title: "Valeur"
-                                }
-                            }}
+                            height: 430,
 
-                            style={{
-                                width: "100%"
-                            }}
-
-                            useResizeHandler={true}
-
-                        />
-
-
-                        <h2>
-                            🗺️ Circuit
-                        </h2>
-
-
-                        <Plot
-
-                            data={[
-                                {
-                                    x: telemetryX,
-                                    y: telemetryY,
-
-                                    mode: "lines",
-
-                                    type: "scatter",
-
-                                    name: driver1
-                                }
-                            ]}
-
-                            layout={{
+                            xaxis: {
                                 title:
-                                    `Tour rapide ${driver1}`,
+                                    "Distance (m)"
+                            },
 
-                                autosize: true,
+                            yaxis: {
+                                title:
+                                    "Vitesse (km/h)"
+                            },
 
-                                height: 600,
+                            hovermode:
+                                "x unified"
+                        }}
 
-                                xaxis: {
-                                    visible: false
-                                },
+                        style={{
+                            width: "100%"
+                        }}
 
-                                yaxis: {
-                                    visible: false,
-                                    scaleanchor: "x"
-                                }
-                            }}
+                        useResizeHandler={true}
 
-                            style={{
-                                width: "100%"
-                            }}
+                    />
 
-                            useResizeHandler={true}
+                )
+            }
 
-                        />
 
-                    </>
+            {/* ========================= */}
+            {/* ACCELERATEUR */}
+            {/* ========================= */}
+
+            <h2>
+                Accélérateur
+            </h2>
+
+
+            {
+                telemetry1.length > 0 &&
+                telemetry2.length > 0 && (
+
+                    <Plot
+
+                        data={[
+                            {
+                                x: distance1,
+                                y: throttle1,
+                                type: "scatter",
+                                mode: "lines",
+                                name: driver1
+                            },
+
+                            {
+                                x: distance2,
+                                y: throttle2,
+                                type: "scatter",
+                                mode: "lines",
+                                name: driver2
+                            }
+                        ]}
+
+                        layout={{
+                            autosize: true,
+
+                            height: 300,
+
+                            xaxis: {
+                                title:
+                                    "Distance (m)"
+                            },
+
+                            yaxis: {
+                                title:
+                                    "Accélérateur (%)",
+                                range: [0, 100]
+                            },
+
+                            hovermode:
+                                "x unified"
+                        }}
+
+                        style={{
+                            width: "100%"
+                        }}
+
+                        useResizeHandler={true}
+
+                    />
+
+                )
+            }
+
+
+            {/* ========================= */}
+            {/* FREIN */}
+            {/* ========================= */}
+
+            <h2>
+                Frein
+            </h2>
+
+
+            {
+                telemetry1.length > 0 &&
+                telemetry2.length > 0 && (
+
+                    <Plot
+
+                        data={[
+                            {
+                                x: distance1,
+                                y: brake1,
+                                type: "scatter",
+                                mode: "lines",
+                                name: driver1
+                            },
+
+                            {
+                                x: distance2,
+                                y: brake2,
+                                type: "scatter",
+                                mode: "lines",
+                                name: driver2
+                            }
+                        ]}
+
+                        layout={{
+                            autosize: true,
+
+                            height: 250,
+
+                            xaxis: {
+                                title:
+                                    "Distance (m)"
+                            },
+
+                            yaxis: {
+                                title:
+                                    "Frein",
+                                range: [0, 100]
+                            },
+
+                            hovermode:
+                                "x unified"
+                        }}
+
+                        style={{
+                            width: "100%"
+                        }}
+
+                        useResizeHandler={true}
+
+                    />
+
+                )
+            }
+
+
+            {/* ========================= */}
+            {/* DRS */}
+            {/* ========================= */}
+
+            <h2>
+                DRS
+            </h2>
+
+
+            {
+                telemetry1.length > 0 &&
+                telemetry2.length > 0 && (
+
+                    <Plot
+
+                        data={[
+                            {
+                                x: distance1,
+                                y: drs1,
+                                type: "scatter",
+                                mode: "lines",
+                                name: driver1
+                            },
+
+                            {
+                                x: distance2,
+                                y: drs2,
+                                type: "scatter",
+                                mode: "lines",
+                                name: driver2
+                            }
+                        ]}
+
+                        layout={{
+                            autosize: true,
+
+                            height: 250,
+
+                            xaxis: {
+                                title:
+                                    "Distance (m)"
+                            },
+
+                            yaxis: {
+                                title:
+                                    "DRS"
+                            },
+
+                            hovermode:
+                                "x unified"
+                        }}
+
+                        style={{
+                            width: "100%"
+                        }}
+
+                        useResizeHandler={true}
+
+                    />
+
+                )
+            }
+
+
+            {/* ========================= */}
+            {/* CIRCUIT */}
+            {/* ========================= */}
+
+            <h2>
+                🗺️ Circuit
+            </h2>
+
+
+            {
+                telemetry1.length === 0 ? (
+
+                    <p>
+                        Pas de données circuit.
+                    </p>
+
+                ) : (
+
+                    <Plot
+
+                        data={[
+                            {
+                                x: circuitX,
+                                y: circuitY,
+
+                                type: "scatter",
+
+                                mode: "lines",
+
+                                name: driver1
+                            }
+                        ]}
+
+                        layout={{
+                            title:
+                                `Tour rapide ${driver1}`,
+
+                            autosize: true,
+
+                            height: 550,
+
+                            xaxis: {
+                                visible: false
+                            },
+
+                            yaxis: {
+                                visible: false,
+                                scaleanchor: "x"
+                            }
+                        }}
+
+                        style={{
+                            width: "100%"
+                        }}
+
+                        useResizeHandler={true}
+
+                    />
 
                 )
             }
@@ -370,7 +680,6 @@ function App() {
                         <Plot
 
                             data={[
-
                                 {
                                     x:
                                         driver1Dominance.map(
@@ -382,11 +691,14 @@ function App() {
                                             p => p.y
                                         ),
 
-                                    mode: "markers",
+                                    type:
+                                        "scatter",
 
-                                    type: "scatter",
+                                    mode:
+                                        "markers",
 
-                                    name: driver1,
+                                    name:
+                                        driver1,
 
                                     marker: {
                                         size: 5
@@ -404,17 +716,19 @@ function App() {
                                             p => p.y
                                         ),
 
-                                    mode: "markers",
+                                    type:
+                                        "scatter",
 
-                                    type: "scatter",
+                                    mode:
+                                        "markers",
 
-                                    name: driver2,
+                                    name:
+                                        driver2,
 
                                     marker: {
                                         size: 5
                                     }
                                 }
-
                             ]}
 
                             layout={{
