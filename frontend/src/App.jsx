@@ -308,6 +308,28 @@ function App() {
                 100
             ).toFixed(1)
             : 0;
+            const fastestDriver =
+    maxSpeed1 >= maxSpeed2
+        ? driver1
+        : driver2;
+
+const fastestSpeed =
+    Math.max(
+        maxSpeed1,
+        maxSpeed2
+    );
+
+const dominantDriver =
+    Number(dominancePercent1) >=
+    Number(dominancePercent2)
+        ? driver1
+        : driver2;
+
+const dominantPercent =
+    Math.max(
+        Number(dominancePercent1),
+        Number(dominancePercent2)
+    );
 
 const deltaDistance =
     dominance.map(
@@ -731,7 +753,41 @@ const deltaSpeed =
                 </div>
 
             )}
+{telemetryAvailable && (
+    <div className="card">
 
+        <h2>
+            📊 Résumé de l'analyse
+        </h2>
+
+        <p>
+            <strong>{fastestDriver}</strong>
+            {" "}possède la vitesse maximale
+            la plus élevée avec{" "}
+            <strong>
+                {fastestSpeed.toFixed(1)} km/h
+            </strong>.
+        </p>
+
+        <p>
+            <strong>{dominantDriver}</strong>
+            {" "}est plus rapide sur{" "}
+            <strong>
+                {dominantPercent.toFixed(1)} %
+            </strong>
+            {" "}des points analysés.
+        </p>
+
+        <p>
+            L'écart maximal observé entre
+            les deux pilotes est de{" "}
+            <strong>
+                {maxDelta.toFixed(1)} km/h
+            </strong>.
+        </p>
+
+    </div>
+)}
 
             {/* CHARGEMENT */}
 
@@ -1046,7 +1102,7 @@ const deltaSpeed =
 
             {/* DOMINATION */}
 
-            <div className="card">
+        <div className="card analysis-summary">
 
                 {dominanceLoading && (
 

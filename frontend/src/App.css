@@ -111,3 +111,18 @@ select {
     }
 
 }
+.card h2 {
+    color: #ffffff;
+}
+
+.card p {
+    color: #e5e5e5;
+}
+.analysis-summary {
+    text-align: center;
+    line-height: 1.7;
+}
+
+.analysis-summary strong {
+    color: #ffffff;
+}
