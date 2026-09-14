@@ -12,6 +12,8 @@ import useDrivers from "./hooks/useDrivers";
 
 import DominanceMap from "./components/DominanceMap";
 
+import "./App.css";
+
 
 function App() {
 
@@ -32,10 +34,15 @@ function App() {
 
 
     // =========================
-    // DONNÉES DYNAMIQUES
+    // COURSES DYNAMIQUES
     // =========================
 
     const races = useRaces(season);
+
+
+    // =========================
+    // PILOTES DYNAMIQUES
+    // =========================
 
     const drivers = useDrivers(
         season,
@@ -83,14 +90,17 @@ function App() {
         let newDriver2 = driver2;
 
 
-        // Pilote 1 invalide
         if (!codes.includes(newDriver1)) {
-            newDriver1 = drivers[0].code;
-            setDriver1(newDriver1);
+
+            newDriver1 =
+                drivers[0].code;
+
+            setDriver1(
+                newDriver1
+            );
         }
 
 
-        // Pilote 2 invalide
         if (
             !codes.includes(newDriver2) ||
             newDriver2 === newDriver1
@@ -102,11 +112,15 @@ function App() {
                         driver.code !== newDriver1
                 );
 
+
             if (secondDriver) {
+
                 setDriver2(
                     secondDriver.code
                 );
+
             }
+
         }
 
     }, [
@@ -120,51 +134,53 @@ function App() {
     // TÉLÉMÉTRIE PILOTE 1
     // =========================
 
- const {
-    telemetry: telemetry1,
-    loading: loading1,
-    error: error1
-} = useTelemetry(
-    season,
-    race,
-    session,
-    driver1
-);
+    const {
+        telemetry: telemetry1,
+        loading: loading1,
+        error: error1
+    } = useTelemetry(
+        season,
+        race,
+        session,
+        driver1
+    );
+
 
     // =========================
     // TÉLÉMÉTRIE PILOTE 2
     // =========================
 
-  const {
-    telemetry: telemetry2,
-    loading: loading2,
-    error: error2
-} = useTelemetry(
-    season,
-    race,
-    session,
-    driver2
-);
+    const {
+        telemetry: telemetry2,
+        loading: loading2,
+        error: error2
+    } = useTelemetry(
+        season,
+        race,
+        session,
+        driver2
+    );
 
 
     // =========================
     // DOMINATION
     // =========================
 
-const {
-    dominance,
-    loading: dominanceLoading,
-    error: dominanceError
-} = useDominance(
-    season,
-    race,
-    session,
-    driver1,
-    driver2
-);
+    const {
+        dominance,
+        loading: dominanceLoading,
+        error: dominanceError
+    } = useDominance(
+        season,
+        race,
+        session,
+        driver1,
+        driver2
+    );
+
 
     // =========================
-    // DONNÉES GRAPHIQUES
+    // DONNÉES PILOTE 1
     // =========================
 
     const distance1 = telemetry1.map(
@@ -188,6 +204,10 @@ const {
     );
 
 
+    // =========================
+    // DONNÉES PILOTE 2
+    // =========================
+
     const distance2 = telemetry2.map(
         point => point.distance
     );
@@ -210,66 +230,59 @@ const {
 
 
     // =========================
-    // CHARGEMENT
+    // ÉTATS AFFICHAGE
     // =========================
-const telemetryLoading =
-    loading1 || loading2;
 
-const telemetryError =
-    error1 || error2;
+    const telemetryLoading =
+        loading1 || loading2;
 
-const telemetryAvailable =
-    !telemetryLoading &&
-    !telemetryError &&
-    telemetry1.length > 0 &&
-    telemetry2.length > 0;
+
+    const telemetryError =
+        error1 || error2;
+
+
+    const telemetryAvailable =
+        !telemetryLoading &&
+        !telemetryError &&
+        telemetry1.length > 0 &&
+        telemetry2.length > 0;
+
+
     return (
 
-        <div
-            style={{
-                maxWidth: "1200px",
-                margin: "0 auto",
-                padding: "20px",
-                fontFamily: "Arial, sans-serif"
-            }}
-        >
+        <div className="app">
 
             {/* ========================= */}
-            {/* TITRE */}
+            {/* HEADER */}
             {/* ========================= */}
 
-            <h1
-                style={{
-                    textAlign: "center"
-                }}
-            >
-                🏎️ F1 Analysis
-            </h1>
+            <div className="header">
+
+                <h1>
+                    🏎️ F1 Analysis
+                </h1>
+
+                <p>
+                    Analyse comparative des performances pilotes
+                </p>
+
+            </div>
 
 
             {/* ========================= */}
             {/* FILTRES */}
             {/* ========================= */}
 
-            <div
-                style={{
-                    display: "flex",
-                    gap: "15px",
-                    flexWrap: "wrap",
-                    justifyContent: "center",
-                    marginBottom: "25px"
-                }}
-            >
+            <div className="filters">
+
 
                 {/* SAISON */}
 
-                <div>
+                <div className="filter-group">
 
                     <label>
                         Saison
                     </label>
-
-                    <br />
 
                     <select
                         value={season}
@@ -281,6 +294,7 @@ const telemetryAvailable =
                             )
                         }
                     >
+
                         <option value={2024}>
                             2024
                         </option>
@@ -300,13 +314,11 @@ const telemetryAvailable =
 
                 {/* GRAND PRIX */}
 
-                <div>
+                <div className="filter-group">
 
                     <label>
                         Grand Prix
                     </label>
-
-                    <br />
 
                     <select
                         value={race}
@@ -337,13 +349,11 @@ const telemetryAvailable =
 
                 {/* SESSION */}
 
-                <div>
+                <div className="filter-group">
 
                     <label>
                         Session
                     </label>
-
-                    <br />
 
                     <select
                         value={session}
@@ -381,13 +391,11 @@ const telemetryAvailable =
 
                 {/* PILOTE 1 */}
 
-                <div>
+                <div className="filter-group">
 
                     <label>
                         Pilote 1
                     </label>
-
-                    <br />
 
                     <select
                         value={driver1}
@@ -422,13 +430,11 @@ const telemetryAvailable =
 
                 {/* PILOTE 2 */}
 
-                <div>
+                <div className="filter-group">
 
                     <label>
                         Pilote 2
                     </label>
-
-                    <br />
 
                     <select
                         value={driver2}
@@ -464,92 +470,56 @@ const telemetryAvailable =
 
 
             {/* ========================= */}
-            {/* INFOS */}
+            {/* INFORMATIONS */}
             {/* ========================= */}
 
-            <div
-                style={{
-                    textAlign: "center"
-                }}
-            >
+            <div className="info">
 
                 <p>
-
-                    Comparaison de télémétrie :
-
-                    {" "}
-
                     <strong>
                         {driver1}
                     </strong>
 
-                    {" "}
-
-                    vs
-
-                    {" "}
+                    {" "}vs{" "}
 
                     <strong>
                         {driver2}
                     </strong>
-
                 </p>
 
 
                 <p>
-
-                    Grand Prix :
-
-                    {" "}
-
-                    <strong>
-                        {race}
-                    </strong>
-
-                    {" "}
-
-                    - Saison {season}
-
-                    {" "}
-
-                    - Session {session}
-
+                    {race}
+                    {" • "}
+                    {season}
+                    {" • "}
+                    {session}
                 </p>
 
             </div>
 
 
-            <hr />
-
-
             {/* ========================= */}
-            {/* CHARGEMENT */}
+            {/* CHARGEMENT TÉLÉMÉTRIE */}
             {/* ========================= */}
 
-           {telemetryLoading && (
+            {telemetryLoading && (
 
-    <p
-        style={{
-            textAlign: "center"
-        }}
-    >
-        ⏳ Chargement de {race}...
-    </p>
+                <p className="status">
+                    ⏳ Chargement de {race}...
+                </p>
 
-)}
+            )}
 
 
-{telemetryError && !telemetryLoading && (
+            {telemetryError &&
+                !telemetryLoading && (
 
-    <p
-        style={{
-            textAlign: "center"
-        }}
-    >
-        ⚠️ {telemetryError}
-    </p>
+                    <p className="status">
+                        ⚠️ {telemetryError}
+                    </p>
 
-)}
+                )}
 
 
             {/* ========================= */}
@@ -562,327 +532,326 @@ const telemetryAvailable =
 
                     {/* VITESSE */}
 
-                    <h2
-                        style={{
-                            textAlign: "center"
-                        }}
-                    >
-                        Vitesse
-                    </h2>
+                    <div className="card">
 
-                    <Plot
+                        <h2>
+                            Vitesse
+                        </h2>
 
-                        data={[
-                            {
-                                x: distance1,
-                                y: speed1,
-                                type: "scatter",
-                                mode: "lines",
-                                name: driver1
-                            },
-                            {
-                                x: distance2,
-                                y: speed2,
-                                type: "scatter",
-                                mode: "lines",
-                                name: driver2
-                            }
-                        ]}
+                        <Plot
 
-                        layout={{
-                            title:
-                                `Vitesse ${driver1} vs ${driver2}`,
+                            data={[
+                                {
+                                    x: distance1,
+                                    y: speed1,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: driver1
+                                },
 
-                            xaxis: {
-                                title: "Distance (m)"
-                            },
+                                {
+                                    x: distance2,
+                                    y: speed2,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: driver2
+                                }
+                            ]}
 
-                            yaxis: {
-                                title: "Vitesse (km/h)"
-                            },
+                            layout={{
+                                title:
+                                    `Vitesse ${driver1} vs ${driver2}`,
 
-                            autosize: true,
+                                xaxis: {
+                                    title: "Distance (m)"
+                                },
 
-                            height: 450,
+                                yaxis: {
+                                    title: "Vitesse (km/h)"
+                                },
 
-                            margin: {
-                                l: 70,
-                                r: 30,
-                                t: 60,
-                                b: 60
-                            }
-                        }}
+                                autosize: true,
 
-                        style={{
-                            width: "100%"
-                        }}
+                                height: 420,
 
-                        useResizeHandler={true}
+                                margin: {
+                                    l: 70,
+                                    r: 30,
+                                    t: 60,
+                                    b: 60
+                                }
+                            }}
 
-                        config={{
-                            responsive: true
-                        }}
+                            style={{
+                                width: "100%"
+                            }}
 
-                    />
+                            useResizeHandler={true}
+
+                            config={{
+                                responsive: true
+                            }}
+
+                        />
+
+                    </div>
 
 
                     {/* ACCÉLÉRATEUR */}
 
-                    <h2
-                        style={{
-                            textAlign: "center"
-                        }}
-                    >
-                        Accélérateur
-                    </h2>
+                    <div className="card">
 
-                    <Plot
+                        <h2>
+                            Accélérateur
+                        </h2>
 
-                        data={[
-                            {
-                                x: distance1,
-                                y: throttle1,
-                                type: "scatter",
-                                mode: "lines",
-                                name: driver1
-                            },
-                            {
-                                x: distance2,
-                                y: throttle2,
-                                type: "scatter",
-                                mode: "lines",
-                                name: driver2
-                            }
-                        ]}
+                        <Plot
 
-                        layout={{
-                            title:
-                                `Accélérateur ${driver1} vs ${driver2}`,
+                            data={[
+                                {
+                                    x: distance1,
+                                    y: throttle1,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: driver1
+                                },
 
-                            xaxis: {
-                                title: "Distance (m)"
-                            },
+                                {
+                                    x: distance2,
+                                    y: throttle2,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: driver2
+                                }
+                            ]}
 
-                            yaxis: {
-                                title: "Accélérateur (%)",
-                                range: [0, 105]
-                            },
+                            layout={{
+                                title:
+                                    `Accélérateur ${driver1} vs ${driver2}`,
 
-                            autosize: true,
+                                xaxis: {
+                                    title: "Distance (m)"
+                                },
 
-                            height: 350,
+                                yaxis: {
+                                    title: "Accélérateur (%)",
+                                    range: [0, 105]
+                                },
 
-                            margin: {
-                                l: 70,
-                                r: 30,
-                                t: 60,
-                                b: 60
-                            }
-                        }}
+                                autosize: true,
 
-                        style={{
-                            width: "100%"
-                        }}
+                                height: 340,
 
-                        useResizeHandler={true}
+                                margin: {
+                                    l: 70,
+                                    r: 30,
+                                    t: 60,
+                                    b: 60
+                                }
+                            }}
 
-                        config={{
-                            responsive: true
-                        }}
+                            style={{
+                                width: "100%"
+                            }}
 
-                    />
+                            useResizeHandler={true}
+
+                            config={{
+                                responsive: true
+                            }}
+
+                        />
+
+                    </div>
 
 
                     {/* FREIN */}
 
-                    <h2
-                        style={{
-                            textAlign: "center"
-                        }}
-                    >
-                        Frein
-                    </h2>
+                    <div className="card">
 
-                    <Plot
+                        <h2>
+                            Frein
+                        </h2>
 
-                        data={[
-                            {
-                                x: distance1,
-                                y: brake1,
-                                type: "scatter",
-                                mode: "lines",
-                                name: driver1
-                            },
-                            {
-                                x: distance2,
-                                y: brake2,
-                                type: "scatter",
-                                mode: "lines",
-                                name: driver2
-                            }
-                        ]}
+                        <Plot
 
-                        layout={{
-                            title:
-                                `Freinage ${driver1} vs ${driver2}`,
+                            data={[
+                                {
+                                    x: distance1,
+                                    y: brake1,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: driver1
+                                },
 
-                            xaxis: {
-                                title: "Distance (m)"
-                            },
+                                {
+                                    x: distance2,
+                                    y: brake2,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: driver2
+                                }
+                            ]}
 
-                            yaxis: {
-                                title: "Frein",
-                                range: [0, 110],
+                            layout={{
+                                title:
+                                    `Freinage ${driver1} vs ${driver2}`,
 
-                                tickvals: [
-                                    0,
-                                    100
-                                ],
+                                xaxis: {
+                                    title: "Distance (m)"
+                                },
 
-                                ticktext: [
-                                    "Non",
-                                    "Oui"
-                                ]
-                            },
+                                yaxis: {
+                                    title: "Frein",
+                                    range: [0, 110],
 
-                            autosize: true,
+                                    tickvals: [
+                                        0,
+                                        100
+                                    ],
 
-                            height: 300,
+                                    ticktext: [
+                                        "Non",
+                                        "Oui"
+                                    ]
+                                },
 
-                            margin: {
-                                l: 70,
-                                r: 30,
-                                t: 60,
-                                b: 60
-                            }
-                        }}
+                                autosize: true,
 
-                        style={{
-                            width: "100%"
-                        }}
+                                height: 300,
 
-                        useResizeHandler={true}
+                                margin: {
+                                    l: 70,
+                                    r: 30,
+                                    t: 60,
+                                    b: 60
+                                }
+                            }}
 
-                        config={{
-                            responsive: true
-                        }}
+                            style={{
+                                width: "100%"
+                            }}
 
-                    />
+                            useResizeHandler={true}
+
+                            config={{
+                                responsive: true
+                            }}
+
+                        />
+
+                    </div>
 
 
                     {/* DRS */}
 
-                    <h2
-                        style={{
-                            textAlign: "center"
-                        }}
-                    >
-                        DRS
-                    </h2>
+                    <div className="card">
 
-                    <Plot
+                        <h2>
+                            DRS
+                        </h2>
 
-                        data={[
-                            {
-                                x: distance1,
-                                y: drs1,
-                                type: "scatter",
-                                mode: "lines",
-                                name: driver1
-                            },
-                            {
-                                x: distance2,
-                                y: drs2,
-                                type: "scatter",
-                                mode: "lines",
-                                name: driver2
-                            }
-                        ]}
+                        <Plot
 
-                        layout={{
-                            title:
-                                `DRS ${driver1} vs ${driver2}`,
+                            data={[
+                                {
+                                    x: distance1,
+                                    y: drs1,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: driver1
+                                },
 
-                            xaxis: {
-                                title: "Distance (m)"
-                            },
+                                {
+                                    x: distance2,
+                                    y: drs2,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: driver2
+                                }
+                            ]}
 
-                            yaxis: {
-                                title: "Valeur DRS"
-                            },
+                            layout={{
+                                title:
+                                    `DRS ${driver1} vs ${driver2}`,
 
-                            autosize: true,
+                                xaxis: {
+                                    title: "Distance (m)"
+                                },
 
-                            height: 300,
+                                yaxis: {
+                                    title: "Valeur DRS"
+                                },
 
-                            margin: {
-                                l: 70,
-                                r: 30,
-                                t: 60,
-                                b: 60
-                            }
-                        }}
+                                autosize: true,
 
-                        style={{
-                            width: "100%"
-                        }}
+                                height: 300,
 
-                        useResizeHandler={true}
+                                margin: {
+                                    l: 70,
+                                    r: 30,
+                                    t: 60,
+                                    b: 60
+                                }
+                            }}
 
-                        config={{
-                            responsive: true
-                        }}
+                            style={{
+                                width: "100%"
+                            }}
 
-                    />
+                            useResizeHandler={true}
+
+                            config={{
+                                responsive: true
+                            }}
+
+                        />
+
+                    </div>
 
                 </>
 
             )}
 
 
-            <hr />
-
-
             {/* ========================= */}
-            {/* CARTE DE DOMINATION */}
+            {/* DOMINATION */}
             {/* ========================= */}
-{dominanceLoading && (
 
-    <p
-        style={{
-            textAlign: "center"
-        }}
-    >
-        ⏳ Calcul de la domination {driver1} vs {driver2}...
-    </p>
+            <div className="card">
 
-)}
+                {dominanceLoading && (
 
+                    <p className="status">
+                        ⏳ Calcul de la domination {driver1} vs {driver2}...
+                    </p>
 
-{dominanceError && !dominanceLoading && (
-
-    <p
-        style={{
-            textAlign: "center"
-        }}
-    >
-        ⚠️ {dominanceError}
-    </p>
-
-)}
+                )}
 
 
-{!dominanceLoading &&
-    !dominanceError &&
-    dominance.length > 0 && (
+                {dominanceError &&
+                    !dominanceLoading && (
 
-        <DominanceMap
-            data={dominance}
-            driver1={driver1}
-            driver2={driver2}
-        />
+                        <p className="status">
+                            ⚠️ {dominanceError}
+                        </p>
 
-    )}
+                    )}
+
+
+                {!dominanceLoading &&
+                    !dominanceError &&
+                    dominance.length > 0 && (
+
+                        <DominanceMap
+                            data={dominance}
+                            driver1={driver1}
+                            driver2={driver2}
+                        />
+
+                    )}
+
+            </div>
 
         </div>
 
