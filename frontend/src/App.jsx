@@ -247,7 +247,68 @@ function App() {
         telemetry1.length > 0 &&
         telemetry2.length > 0;
 
+// =========================
+// STATISTIQUES
+// =========================
 
+const maxSpeed1 =
+    speed1.length > 0
+        ? Math.max(...speed1)
+        : 0;
+
+const maxSpeed2 =
+    speed2.length > 0
+        ? Math.max(...speed2)
+        : 0;
+
+
+// Écart maximal calculé à partir
+// des données de domination interpolées
+const maxDelta =
+    dominance.length > 0
+        ? Math.max(
+            ...dominance.map(
+                point => Math.abs(point.delta)
+            )
+        )
+        : 0;
+
+
+// Nombre de points dominés
+const dominanceDriver1 =
+    dominance.filter(
+        point => point.delta >= 0
+    ).length;
+
+const dominanceDriver2 =
+    dominance.filter(
+        point => point.delta < 0
+    ).length;
+
+
+const totalDominancePoints =
+    dominanceDriver1 +
+    dominanceDriver2;
+
+
+const dominancePercent1 =
+    totalDominancePoints > 0
+        ? (
+            dominanceDriver1 /
+            totalDominancePoints *
+            100
+        ).toFixed(1)
+        : 0;
+
+
+const dominancePercent2 =
+    totalDominancePoints > 0
+        ? (
+            dominanceDriver2 /
+            totalDominancePoints *
+            100
+        ).toFixed(1)
+        : 0;
     return (
 
         <div className="app">
@@ -497,7 +558,73 @@ function App() {
                 </p>
 
             </div>
+{telemetryAvailable && (
 
+    <div className="stats-grid">
+
+        <div className="stat-card">
+
+            <span className="stat-title">
+                Vitesse max {driver1}
+            </span>
+
+            <strong className="stat-value">
+                {maxSpeed1.toFixed(1)}
+                <small> km/h</small>
+            </strong>
+
+        </div>
+
+
+        <div className="stat-card">
+
+            <span className="stat-title">
+                Vitesse max {driver2}
+            </span>
+
+            <strong className="stat-value">
+                {maxSpeed2.toFixed(1)}
+                <small> km/h</small>
+            </strong>
+
+        </div>
+
+
+        <div className="stat-card">
+
+            <span className="stat-title">
+                Écart maximal
+            </span>
+
+            <strong className="stat-value">
+                {maxDelta.toFixed(1)}
+                <small> km/h</small>
+            </strong>
+
+        </div>
+
+
+        <div className="stat-card">
+
+            <span className="stat-title">
+                Domination
+            </span>
+
+            <strong className="stat-value stat-small">
+
+                {driver1} {dominancePercent1}%
+
+                <br />
+
+                {driver2} {dominancePercent2}%
+
+            </strong>
+
+        </div>
+
+    </div>
+
+)}
 
             {/* ========================= */}
             {/* CHARGEMENT TÉLÉMÉTRIE */}
