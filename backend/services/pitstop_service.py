@@ -1,6 +1,6 @@
 import fastf1
 
-
+from services.session_cache import get_cached_session
 def get_pitstops(
     year,
     race,
@@ -8,11 +8,7 @@ def get_pitstops(
     driver
 ):
 
-    session = fastf1.get_session(
-        year,
-        race,
-        session_type
-    )
+  
 
     session.load()
 

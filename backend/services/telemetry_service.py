@@ -1,4 +1,4 @@
-import fastf1
+from services.session_cache import get_cached_session
 
 
 def get_telemetry(
@@ -8,56 +8,44 @@ def get_telemetry(
     driver
 ):
 
-    session = fastf1.get_session(
+    session = get_cached_session(
         year,
         race,
         session_type
     )
 
-    session.load()
-
-
     laps = session.laps
-
 
     driver_laps = laps[
         laps["Driver"] == driver
     ]
 
+    if driver_laps.empty:
+        return {
+            "conducteur": driver,
+            "telemetrie": []
+        }
 
-    fastest = driver_laps.pick_fastest()
+    fastest_lap = driver_laps.pick_fastest()
 
+    telemetry = fastest_lap.get_telemetry()
 
-    telemetry = fastest.get_telemetry()
-
-
-    data = []
-
+    points = []
 
     for _, row in telemetry.iterrows():
 
-        data.append({
-
+        points.append({
             "distance": float(row["Distance"]),
             "speed": float(row["Speed"]),
             "throttle": float(row["Throttle"]),
             "brake": float(row["Brake"]),
-            "gear": int(row["nGear"]),
             "drs": int(row["DRS"]),
+            "gear": int(row["nGear"]),
             "x": float(row["X"]),
             "y": float(row["Y"])
-
         })
 
-
     return {
-
         "conducteur": driver,
-
-        "tour": int(
-            fastest["LapNumber"]
-        ),
-
-        "telemetrie": data
-
+        "telemetrie": points
     }

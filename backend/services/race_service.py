@@ -1,5 +1,5 @@
 import fastf1
-
+from services.session_cache import get_cached_session
 
 def get_races(year):
 
