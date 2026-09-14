@@ -17,10 +17,6 @@ import "./App.css";
 
 function App() {
 
-    // =========================
-    // ÉTATS
-    // =========================
-
     const [season, setSeason] = useState(2024);
 
     const [race, setRace] = useState(
@@ -33,16 +29,32 @@ function App() {
     const [driver2, setDriver2] = useState("VER");
 
 
-    // =========================
-    // COURSES DYNAMIQUES
-    // =========================
+    /*
+    =========================
+    GRANDS PRIX
+    =========================
+    */
 
     const races = useRaces(season);
 
 
-    // =========================
-    // PILOTES DYNAMIQUES
-    // =========================
+    useEffect(() => {
+
+        if (
+            races.length > 0 &&
+            !races.includes(race)
+        ) {
+            setRace(races[0]);
+        }
+
+    }, [races, race]);
+
+
+    /*
+    =========================
+    PILOTES
+    =========================
+    */
 
     const drivers = useDrivers(
         season,
@@ -50,30 +62,6 @@ function App() {
         session
     );
 
-
-    // =========================
-    // VÉRIFICATION GRAND PRIX
-    // =========================
-
-    useEffect(() => {
-
-        if (races.length === 0) {
-            return;
-        }
-
-        if (!races.includes(race)) {
-            setRace(races[0]);
-        }
-
-    }, [
-        races,
-        race
-    ]);
-
-
-    // =========================
-    // VÉRIFICATION PILOTES
-    // =========================
 
     useEffect(() => {
 
@@ -86,41 +74,31 @@ function App() {
         );
 
 
-        let newDriver1 = driver1;
-        let newDriver2 = driver2;
+        const nextDriver1 =
+            codes.includes(driver1)
+                ? driver1
+                : codes[0];
 
 
-        if (!codes.includes(newDriver1)) {
-
-            newDriver1 =
-                drivers[0].code;
-
-            setDriver1(
-                newDriver1
-            );
+        if (driver1 !== nextDriver1) {
+            setDriver1(nextDriver1);
         }
 
 
         if (
-            !codes.includes(newDriver2) ||
-            newDriver2 === newDriver1
+            !codes.includes(driver2) ||
+            driver2 === nextDriver1
         ) {
 
             const secondDriver =
-                drivers.find(
-                    driver =>
-                        driver.code !== newDriver1
+                codes.find(
+                    code =>
+                        code !== nextDriver1
                 );
-
 
             if (secondDriver) {
-
-                setDriver2(
-                    secondDriver.code
-                );
-
+                setDriver2(secondDriver);
             }
-
         }
 
     }, [
@@ -130,9 +108,11 @@ function App() {
     ]);
 
 
-    // =========================
-    // TÉLÉMÉTRIE PILOTE 1
-    // =========================
+    /*
+    =========================
+    TELEMETRIE
+    =========================
+    */
 
     const {
         telemetry: telemetry1,
@@ -146,10 +126,6 @@ function App() {
     );
 
 
-    // =========================
-    // TÉLÉMÉTRIE PILOTE 2
-    // =========================
-
     const {
         telemetry: telemetry2,
         loading: loading2,
@@ -162,9 +138,11 @@ function App() {
     );
 
 
-    // =========================
-    // DOMINATION
-    // =========================
+    /*
+    =========================
+    DOMINATION
+    =========================
+    */
 
     const {
         dominance,
@@ -179,67 +157,81 @@ function App() {
     );
 
 
-    // =========================
-    // DONNÉES PILOTE 1
-    // =========================
+    /*
+    =========================
+    DONNEES GRAPHIQUES
+    =========================
+    */
 
-    const distance1 = telemetry1.map(
-        point => point.distance
-    );
+    const distance1 =
+        telemetry1.map(
+            point => point.distance
+        );
 
-    const speed1 = telemetry1.map(
-        point => point.vitesse
-    );
+    const speed1 =
+        telemetry1.map(
+            point => point.vitesse
+        );
 
-    const throttle1 = telemetry1.map(
-        point => point.accelerateur
-    );
+    const throttle1 =
+        telemetry1.map(
+            point => point.accelerateur
+        );
 
-    const brake1 = telemetry1.map(
-        point => point.frein ? 100 : 0
-    );
+    const brake1 =
+        telemetry1.map(
+            point =>
+                point.frein
+                    ? 100
+                    : 0
+        );
 
-    const drs1 = telemetry1.map(
-        point => point.drs
-    );
-
-
-    // =========================
-    // DONNÉES PILOTE 2
-    // =========================
-
-    const distance2 = telemetry2.map(
-        point => point.distance
-    );
-
-    const speed2 = telemetry2.map(
-        point => point.vitesse
-    );
-
-    const throttle2 = telemetry2.map(
-        point => point.accelerateur
-    );
-
-    const brake2 = telemetry2.map(
-        point => point.frein ? 100 : 0
-    );
-
-    const drs2 = telemetry2.map(
-        point => point.drs
-    );
+    const drs1 =
+        telemetry1.map(
+            point => point.drs
+        );
 
 
-    // =========================
-    // ÉTATS AFFICHAGE
-    // =========================
+    const distance2 =
+        telemetry2.map(
+            point => point.distance
+        );
+
+    const speed2 =
+        telemetry2.map(
+            point => point.vitesse
+        );
+
+    const throttle2 =
+        telemetry2.map(
+            point => point.accelerateur
+        );
+
+    const brake2 =
+        telemetry2.map(
+            point =>
+                point.frein
+                    ? 100
+                    : 0
+        );
+
+    const drs2 =
+        telemetry2.map(
+            point => point.drs
+        );
+
+
+    /*
+    =========================
+    ETATS
+    =========================
+    */
 
     const telemetryLoading =
         loading1 || loading2;
 
-
     const telemetryError =
         error1 || error2;
-
 
     const telemetryAvailable =
         !telemetryLoading &&
@@ -247,92 +239,155 @@ function App() {
         telemetry1.length > 0 &&
         telemetry2.length > 0;
 
-// =========================
-// STATISTIQUES
-// =========================
 
-const maxSpeed1 =
-    speed1.length > 0
-        ? Math.max(...speed1)
-        : 0;
+    /*
+    =========================
+    STATISTIQUES
+    =========================
+    */
 
-const maxSpeed2 =
-    speed2.length > 0
-        ? Math.max(...speed2)
-        : 0;
+    const maxSpeed1 =
+        speed1.length > 0
+            ? Math.max(...speed1)
+            : 0;
 
 
-// Écart maximal calculé à partir
-// des données de domination interpolées
-const maxDelta =
-    dominance.length > 0
-        ? Math.max(
-            ...dominance.map(
-                point => Math.abs(point.delta)
+    const maxSpeed2 =
+        speed2.length > 0
+            ? Math.max(...speed2)
+            : 0;
+
+
+    const maxDelta =
+        dominance.length > 0
+            ? Math.max(
+                ...dominance.map(
+                    point =>
+                        Math.abs(
+                            point.delta
+                        )
+                )
             )
-        )
-        : 0;
+            : 0;
 
 
-// Nombre de points dominés
-const dominanceDriver1 =
-    dominance.filter(
-        point => point.delta >= 0
-    ).length;
-
-const dominanceDriver2 =
-    dominance.filter(
-        point => point.delta < 0
-    ).length;
+    const dominanceDriver1 =
+        dominance.filter(
+            point =>
+                point.delta >= 0
+        ).length;
 
 
-const totalDominancePoints =
-    dominanceDriver1 +
-    dominanceDriver2;
+    const dominanceDriver2 =
+        dominance.filter(
+            point =>
+                point.delta < 0
+        ).length;
 
 
-const dominancePercent1 =
-    totalDominancePoints > 0
-        ? (
-            dominanceDriver1 /
-            totalDominancePoints *
-            100
-        ).toFixed(1)
-        : 0;
+    const totalDominancePoints =
+        dominanceDriver1 +
+        dominanceDriver2;
 
 
-const dominancePercent2 =
-    totalDominancePoints > 0
-        ? (
-            dominanceDriver2 /
-            totalDominancePoints *
-            100
-        ).toFixed(1)
-        : 0;
+    const dominancePercent1 =
+        totalDominancePoints > 0
+            ? (
+                dominanceDriver1 /
+                totalDominancePoints *
+                100
+            ).toFixed(1)
+            : 0;
+
+
+    const dominancePercent2 =
+        totalDominancePoints > 0
+            ? (
+                dominanceDriver2 /
+                totalDominancePoints *
+                100
+            ).toFixed(1)
+            : 0;
+
+
+    /*
+    =========================
+    THEME PLOTLY
+    =========================
+    */
+
+    const commonLayout = {
+
+        autosize: true,
+
+        paper_bgcolor: "transparent",
+
+        plot_bgcolor: "#1a1a1a",
+
+        font: {
+            color: "#ffffff"
+        },
+
+        xaxis: {
+            title: "Distance (m)",
+            gridcolor: "#333333",
+            zerolinecolor: "#444444"
+        },
+
+        legend: {
+            orientation: "h",
+            x: 0.5,
+            xanchor: "center",
+            font: {
+                color: "#ffffff"
+            }
+        },
+
+        margin: {
+            l: 65,
+            r: 30,
+            t: 60,
+            b: 60
+        },
+
+        hovermode: "x unified"
+    };
+
+
+    const commonConfig = {
+        responsive: true,
+        displayModeBar: false
+    };
+
+
+    /*
+    =========================
+    AFFICHAGE
+    =========================
+    */
+
     return (
 
         <div className="app">
 
-            {/* ========================= */}
-            {/* HEADER */}
-            {/* ========================= */}
 
-            <div className="header">
+            {/* HEADER */}
+
+            <header className="header">
 
                 <h1>
                     🏎️ F1 Analysis
                 </h1>
 
                 <p>
-                    Analyse comparative des performances pilotes
+                    Analyse comparative
+                    des télémétries Formula 1
                 </p>
 
-            </div>
+            </header>
 
 
-            {/* ========================= */}
             {/* FILTRES */}
-            {/* ========================= */}
 
             <div className="filters">
 
@@ -347,12 +402,13 @@ const dominancePercent2 =
 
                     <select
                         value={season}
-                        onChange={(e) =>
-                            setSeason(
-                                Number(
-                                    e.target.value
+                        onChange={
+                            e =>
+                                setSeason(
+                                    Number(
+                                        e.target.value
+                                    )
                                 )
-                            )
                         }
                     >
 
@@ -383,10 +439,11 @@ const dominancePercent2 =
 
                     <select
                         value={race}
-                        onChange={(e) =>
-                            setRace(
-                                e.target.value
-                            )
+                        onChange={
+                            e =>
+                                setRace(
+                                    e.target.value
+                                )
                         }
                     >
 
@@ -418,12 +475,21 @@ const dominancePercent2 =
 
                     <select
                         value={session}
-                        onChange={(e) =>
-                            setSession(
-                                e.target.value
-                            )
+                        onChange={
+                            e =>
+                                setSession(
+                                    e.target.value
+                                )
                         }
                     >
+
+                        <option value="R">
+                            Course
+                        </option>
+
+                        <option value="Q">
+                            Qualifications
+                        </option>
 
                         <option value="FP1">
                             Essais libres 1
@@ -435,14 +501,6 @@ const dominancePercent2 =
 
                         <option value="FP3">
                             Essais libres 3
-                        </option>
-
-                        <option value="Q">
-                            Qualifications
-                        </option>
-
-                        <option value="R">
-                            Course
                         </option>
 
                     </select>
@@ -460,10 +518,11 @@ const dominancePercent2 =
 
                     <select
                         value={driver1}
-                        onChange={(e) =>
-                            setDriver1(
-                                e.target.value
-                            )
+                        onChange={
+                            e =>
+                                setDriver1(
+                                    e.target.value
+                                )
                         }
                     >
 
@@ -471,14 +530,20 @@ const dominancePercent2 =
                             driver => (
 
                                 <option
-                                    key={driver.code}
-                                    value={driver.code}
+                                    key={
+                                        driver.code
+                                    }
+                                    value={
+                                        driver.code
+                                    }
                                     disabled={
                                         driver.code ===
                                         driver2
                                     }
                                 >
                                     {driver.nom}
+                                    {" "}
+                                    ({driver.code})
                                 </option>
 
                             )
@@ -499,10 +564,11 @@ const dominancePercent2 =
 
                     <select
                         value={driver2}
-                        onChange={(e) =>
-                            setDriver2(
-                                e.target.value
-                            )
+                        onChange={
+                            e =>
+                                setDriver2(
+                                    e.target.value
+                                )
                         }
                     >
 
@@ -510,14 +576,20 @@ const dominancePercent2 =
                             driver => (
 
                                 <option
-                                    key={driver.code}
-                                    value={driver.code}
+                                    key={
+                                        driver.code
+                                    }
+                                    value={
+                                        driver.code
+                                    }
                                     disabled={
                                         driver.code ===
                                         driver1
                                     }
                                 >
                                     {driver.nom}
+                                    {" "}
+                                    ({driver.code})
                                 </option>
 
                             )
@@ -530,128 +602,157 @@ const dominancePercent2 =
             </div>
 
 
-            {/* ========================= */}
             {/* INFORMATIONS */}
-            {/* ========================= */}
 
             <div className="info">
 
-                <p>
-                    <strong>
-                        {driver1}
-                    </strong>
-
-                    {" "}vs{" "}
-
-                    <strong>
-                        {driver2}
-                    </strong>
-                </p>
-
-
-                <p>
-                    {race}
-                    {" • "}
+                <strong>
                     {season}
-                    {" • "}
-                    {session}
-                </p>
+                </strong>
+
+                {" — "}
+
+                {race}
+
+                {" — "}
+
+                {session}
+
+                {" — "}
+
+                {driver1}
+
+                {" vs "}
+
+                {driver2}
 
             </div>
-{telemetryAvailable && (
-
-    <div className="stats-grid">
-
-        <div className="stat-card">
-
-            <span className="stat-title">
-                Vitesse max {driver1}
-            </span>
-
-            <strong className="stat-value">
-                {maxSpeed1.toFixed(1)}
-                <small> km/h</small>
-            </strong>
-
-        </div>
 
 
-        <div className="stat-card">
+            {/* STATISTIQUES */}
 
-            <span className="stat-title">
-                Vitesse max {driver2}
-            </span>
+            {telemetryAvailable && (
 
-            <strong className="stat-value">
-                {maxSpeed2.toFixed(1)}
-                <small> km/h</small>
-            </strong>
-
-        </div>
+                <div className="stats-grid">
 
 
-        <div className="stat-card">
+                    <div className="stat-card">
 
-            <span className="stat-title">
-                Écart maximal
-            </span>
+                        <span className="stat-title">
+                            Vitesse max {driver1}
+                        </span>
 
-            <strong className="stat-value">
-                {maxDelta.toFixed(1)}
-                <small> km/h</small>
-            </strong>
+                        <strong className="stat-value">
 
-        </div>
+                            {maxSpeed1.toFixed(1)}
+
+                            <small>
+                                {" "}km/h
+                            </small>
+
+                        </strong>
+
+                    </div>
 
 
-        <div className="stat-card">
+                    <div className="stat-card">
 
-            <span className="stat-title">
-                Domination
-            </span>
+                        <span className="stat-title">
+                            Vitesse max {driver2}
+                        </span>
 
-            <strong className="stat-value stat-small">
+                        <strong className="stat-value">
 
-                {driver1} {dominancePercent1}%
+                            {maxSpeed2.toFixed(1)}
 
-                <br />
+                            <small>
+                                {" "}km/h
+                            </small>
 
-                {driver2} {dominancePercent2}%
+                        </strong>
 
-            </strong>
+                    </div>
 
-        </div>
 
-    </div>
+                    <div className="stat-card">
 
-)}
+                        <span className="stat-title">
+                            Écart maximal
+                        </span>
 
-            {/* ========================= */}
-            {/* CHARGEMENT TÉLÉMÉTRIE */}
-            {/* ========================= */}
+                        <strong className="stat-value">
 
-            {telemetryLoading && (
+                            {maxDelta.toFixed(1)}
 
-                <p className="status">
-                    ⏳ Chargement de {race}...
-                </p>
+                            <small>
+                                {" "}km/h
+                            </small>
+
+                        </strong>
+
+                    </div>
+
+
+                    <div className="stat-card">
+
+                        <span className="stat-title">
+                            Domination
+                        </span>
+
+                        <strong
+                            className="
+                                stat-value
+                                stat-small
+                            "
+                        >
+
+                            {driver1}
+                            {" "}
+                            {dominancePercent1}%
+
+                            <br />
+
+                            {driver2}
+                            {" "}
+                            {dominancePercent2}%
+
+                        </strong>
+
+                    </div>
+
+                </div>
 
             )}
 
 
-            {telemetryError &&
-                !telemetryLoading && (
+            {/* CHARGEMENT */}
 
-                    <p className="status">
+            {telemetryLoading && (
+
+                <div className="card status">
+
+                    Chargement de la télémétrie...
+
+                </div>
+
+            )}
+
+
+            {/* ERREUR */}
+
+            {!telemetryLoading &&
+                telemetryError && (
+
+                    <div className="card status">
+
                         ⚠️ {telemetryError}
-                    </p>
+
+                    </div>
 
                 )}
 
 
-            {/* ========================= */}
             {/* GRAPHIQUES */}
-            {/* ========================= */}
 
             {telemetryAvailable && (
 
@@ -661,12 +762,7 @@ const dominancePercent2 =
 
                     <div className="card">
 
-                        <h2>
-                            Vitesse
-                        </h2>
-
                         <Plot
-
                             data={[
                                 {
                                     x: distance1,
@@ -675,7 +771,6 @@ const dominancePercent2 =
                                     mode: "lines",
                                     name: driver1
                                 },
-
                                 {
                                     x: distance2,
                                     y: speed2,
@@ -684,56 +779,40 @@ const dominancePercent2 =
                                     name: driver2
                                 }
                             ]}
-
                             layout={{
+                                ...commonLayout,
+
                                 title:
-                                    `Vitesse ${driver1} vs ${driver2}`,
-
-                                xaxis: {
-                                    title: "Distance (m)"
-                                },
-
-                                yaxis: {
-                                    title: "Vitesse (km/h)"
-                                },
-
-                                autosize: true,
+                                    "Vitesse",
 
                                 height: 420,
 
-                                margin: {
-                                    l: 70,
-                                    r: 30,
-                                    t: 60,
-                                    b: 60
+                                yaxis: {
+                                    title:
+                                        "Vitesse (km/h)",
+
+                                    gridcolor:
+                                        "#333333",
+
+                                    zerolinecolor:
+                                        "#444444"
                                 }
                             }}
-
                             style={{
                                 width: "100%"
                             }}
-
                             useResizeHandler={true}
-
-                            config={{
-                                responsive: true
-                            }}
-
+                            config={commonConfig}
                         />
 
                     </div>
 
 
-                    {/* ACCÉLÉRATEUR */}
+                    {/* ACCELERATEUR */}
 
                     <div className="card">
 
-                        <h2>
-                            Accélérateur
-                        </h2>
-
                         <Plot
-
                             data={[
                                 {
                                     x: distance1,
@@ -742,7 +821,6 @@ const dominancePercent2 =
                                     mode: "lines",
                                     name: driver1
                                 },
-
                                 {
                                     x: distance2,
                                     y: throttle2,
@@ -751,42 +829,34 @@ const dominancePercent2 =
                                     name: driver2
                                 }
                             ]}
-
                             layout={{
-                                title:
-                                    `Accélérateur ${driver1} vs ${driver2}`,
+                                ...commonLayout,
 
-                                xaxis: {
-                                    title: "Distance (m)"
-                                },
+                                title:
+                                    "Accélérateur",
+
+                                height: 350,
 
                                 yaxis: {
-                                    title: "Accélérateur (%)",
-                                    range: [0, 105]
-                                },
+                                    title: "%",
 
-                                autosize: true,
+                                    range: [
+                                        0,
+                                        100
+                                    ],
 
-                                height: 340,
+                                    gridcolor:
+                                        "#333333",
 
-                                margin: {
-                                    l: 70,
-                                    r: 30,
-                                    t: 60,
-                                    b: 60
+                                    zerolinecolor:
+                                        "#444444"
                                 }
                             }}
-
                             style={{
                                 width: "100%"
                             }}
-
                             useResizeHandler={true}
-
-                            config={{
-                                responsive: true
-                            }}
-
+                            config={commonConfig}
                         />
 
                     </div>
@@ -796,12 +866,7 @@ const dominancePercent2 =
 
                     <div className="card">
 
-                        <h2>
-                            Frein
-                        </h2>
-
                         <Plot
-
                             data={[
                                 {
                                     x: distance1,
@@ -810,7 +875,6 @@ const dominancePercent2 =
                                     mode: "lines",
                                     name: driver1
                                 },
-
                                 {
                                     x: distance2,
                                     y: brake2,
@@ -819,52 +883,34 @@ const dominancePercent2 =
                                     name: driver2
                                 }
                             ]}
-
                             layout={{
-                                title:
-                                    `Freinage ${driver1} vs ${driver2}`,
+                                ...commonLayout,
 
-                                xaxis: {
-                                    title: "Distance (m)"
-                                },
+                                title:
+                                    "Frein",
+
+                                height: 350,
 
                                 yaxis: {
-                                    title: "Frein",
-                                    range: [0, 110],
+                                    title: "%",
 
-                                    tickvals: [
+                                    range: [
                                         0,
                                         100
                                     ],
 
-                                    ticktext: [
-                                        "Non",
-                                        "Oui"
-                                    ]
-                                },
+                                    gridcolor:
+                                        "#333333",
 
-                                autosize: true,
-
-                                height: 300,
-
-                                margin: {
-                                    l: 70,
-                                    r: 30,
-                                    t: 60,
-                                    b: 60
+                                    zerolinecolor:
+                                        "#444444"
                                 }
                             }}
-
                             style={{
                                 width: "100%"
                             }}
-
                             useResizeHandler={true}
-
-                            config={{
-                                responsive: true
-                            }}
-
+                            config={commonConfig}
                         />
 
                     </div>
@@ -874,12 +920,7 @@ const dominancePercent2 =
 
                     <div className="card">
 
-                        <h2>
-                            DRS
-                        </h2>
-
                         <Plot
-
                             data={[
                                 {
                                     x: distance1,
@@ -888,7 +929,6 @@ const dominancePercent2 =
                                     mode: "lines",
                                     name: driver1
                                 },
-
                                 {
                                     x: distance2,
                                     y: drs2,
@@ -897,41 +937,30 @@ const dominancePercent2 =
                                     name: driver2
                                 }
                             ]}
-
                             layout={{
-                                title:
-                                    `DRS ${driver1} vs ${driver2}`,
+                                ...commonLayout,
 
-                                xaxis: {
-                                    title: "Distance (m)"
-                                },
+                                title:
+                                    "DRS",
+
+                                height: 350,
 
                                 yaxis: {
-                                    title: "Valeur DRS"
-                                },
+                                    title:
+                                        "État DRS",
 
-                                autosize: true,
+                                    gridcolor:
+                                        "#333333",
 
-                                height: 300,
-
-                                margin: {
-                                    l: 70,
-                                    r: 30,
-                                    t: 60,
-                                    b: 60
+                                    zerolinecolor:
+                                        "#444444"
                                 }
                             }}
-
                             style={{
                                 width: "100%"
                             }}
-
                             useResizeHandler={true}
-
-                            config={{
-                                responsive: true
-                            }}
-
+                            config={commonConfig}
                         />
 
                     </div>
@@ -941,27 +970,30 @@ const dominancePercent2 =
             )}
 
 
-            {/* ========================= */}
             {/* DOMINATION */}
-            {/* ========================= */}
 
             <div className="card">
 
                 {dominanceLoading && (
 
-                    <p className="status">
-                        ⏳ Calcul de la domination {driver1} vs {driver2}...
-                    </p>
+                    <div className="status">
+
+                        Chargement de la
+                        carte de domination...
+
+                    </div>
 
                 )}
 
 
-                {dominanceError &&
-                    !dominanceLoading && (
+                {!dominanceLoading &&
+                    dominanceError && (
 
-                        <p className="status">
+                        <div className="status">
+
                             ⚠️ {dominanceError}
-                        </p>
+
+                        </div>
 
                     )}
 
@@ -981,9 +1013,7 @@ const dominancePercent2 =
             </div>
 
         </div>
-
     );
-
 }
 
 
