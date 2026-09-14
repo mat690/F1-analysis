@@ -1,415 +1,458 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Plot from "react-plotly.js";
 
-import api from "./services/api";
-
-import Header from "./components/Header";
-import ComparisonChart from "./components/ComparisonChart";
-import ComparisonPanel from "./components/ComparisonPanel";
-import TrackMap from "./components/TrackMap";
-import DominanceMap from "./components/DominanceMap";
-import TelemetryChart from "./components/TelemetryChart";
-import TelemetryMap from "./components/TelemetryMap";
-import LongRunAnalysis from "./components/LongRunAnalysis";
-
-
-import useStats from "./hooks/useStats";
 import useTelemetry from "./hooks/useTelemetry";
-import useLongRun from "./hooks/useLongRun";
-
-import useTrack from "./hooks/useTrack";
 import useDominance from "./hooks/useDominance";
-import useFormulaInsight from "./hooks/useFormulaInsight";
-import FormulaInsight from "./components/FormulaInsight";
-import Navbar from "./components/Navbar";
-import Dashboard from "./pages/Dashboard";
-import SessionSelector from "./components/SessionSelector";
-import TelemetryPage from "./pages/Telemetry";
-import FormulaInsightPages from "./pages/FormulaInsightPages";
-import RaceAnalysis from "./pages/RaceAnalysis";
-function App(){
+
+
+function App() {
+
+    const [season, setSeason] = useState(2024);
+    const [race, setRace] = useState("Monaco");
+    const [session, setSession] = useState("R");
+
+    const [driver1, setDriver1] = useState("LEC");
+    const [driver2, setDriver2] = useState("VER");
 
 
     // =========================
-    // Sélections utilisateur
+    // API
     // =========================
-
-    const [seasons,setSeasons] = useState([]);
-
-    const [races,setRaces] = useState([]);
-
-const [telemetryIndex,setTelemetryIndex] = useState(0);
-    const [selectedSeason,setSelectedSeason] = useState(2024);
-
-    const [selectedRace,setSelectedRace] = useState("Monaco");
-const [page,setPage] = useState("dashboard");
-
-    const [session,setSession] = useState("Q");
-
-
-    const [driver1,setDriver1] = useState("LEC");
-
-    const [driver2,setDriver2] = useState("VER");
-
-
-
-
-    // =========================
-    // Données circuit
-    // =========================
-
-
-
-  const track = useTrack(
-
-    selectedSeason,
-    selectedRace,
-    session,
-    driver1
-
-);
-
-
-
-const dominance = useDominance(
-
-    selectedSeason,
-    selectedRace,
-    session,
-    driver1,
-    driver2
-
-);
-
-
-    // =========================
-    // Hooks données
-    // =========================
-
 
     const {
+        telemetry
+    } = useTelemetry(
+        season,
+        race,
+        session,
+        driver1
+    );
 
-        stats1,
-        stats2,
-        laps1,
-        laps2
 
-    } = useStats(
-        selectedSeason,
-        selectedRace,
+    const dominance = useDominance(
+        season,
+        race,
         session,
         driver1,
         driver2
     );
 
 
+    // =========================
+    // Télémétrie
+    // =========================
 
-    const {
+    const telemetryDistance = telemetry.map(
+        p => p.distance
+    );
 
-        telemetry,
-        index,
-        setIndex
+    const telemetrySpeed = telemetry.map(
+        p => p.vitesse
+    );
 
-    } = useTelemetry(
-        selectedSeason,
-        selectedRace,
-        session,
-        driver1
+    const telemetryThrottle = telemetry.map(
+        p => p.accelerateur
     );
 
 
+    // =========================
+    // Carte circuit télémétrie
+    // =========================
 
-    const longRun = useLongRun(
+    const telemetryX = telemetry.map(
+        p => p.x
+    );
 
-        selectedSeason,
-        selectedRace,
-        session,
-        driver1
-
+    const telemetryY = telemetry.map(
+        p => p.y
     );
 
 
-const formulaInsight = useFormulaInsight(
-
-    selectedSeason,
-    selectedRace,
-    session,
-    driver1,
-    driver2
-
-);
-
     // =========================
-    // Listes
+    // Domination
     // =========================
 
+    const driver1Dominance =
+        dominance.filter(
+            p => p.delta >= 0
+        );
 
-    const sessions = [
-
-        {
-            code:"FP1",
-            name:"Essais Libres 1"
-        },
-
-        {
-            code:"FP2",
-            name:"Essais Libres 2"
-        },
-
-        {
-            code:"FP3",
-            name:"Essais Libres 3"
-        },
-
-        {
-            code:"Q",
-            name:"Qualifications"
-        },
-
-        {
-            code:"R",
-            name:"Course"
-        }
-
-    ];
+    const driver2Dominance =
+        dominance.filter(
+            p => p.delta < 0
+        );
 
 
+    return (
 
-    const drivers = [
+        <div
+            style={{
+                maxWidth: "1200px",
+                margin: "auto",
+                padding: "20px",
+                fontFamily: "Arial"
+            }}
+        >
 
-        {
-            code:"LEC",
-            name:"Charles Leclerc"
-        },
-
-        {
-            code:"VER",
-            name:"Max Verstappen"
-        },
-
-        {
-            code:"NOR",
-            name:"Lando Norris"
-        },
-
-        {
-            code:"PIA",
-            name:"Oscar Piastri"
-        },
-
-        {
-            code:"HAM",
-            name:"Lewis Hamilton"
-        },
-
-        {
-            code:"RUS",
-            name:"George Russell"
-        }
-
-    ];
+            <h1>
+                🏎️ F1 Analysis
+            </h1>
 
 
+            {/* ========================= */}
+            {/* Sélecteurs */}
+            {/* ========================= */}
+
+            <div
+                style={{
+                    display: "flex",
+                    gap: "10px",
+                    flexWrap: "wrap",
+                    marginBottom: "30px"
+                }}
+            >
+
+                <select
+                    value={season}
+                    onChange={
+                        e => setSeason(
+                            Number(e.target.value)
+                        )
+                    }
+                >
+                    <option value={2024}>
+                        2024
+                    </option>
+                </select>
 
 
-
-    // =========================
-    // Chargement saisons
-    // =========================
-
-
-    useEffect(()=>{
-
-
-        api
-        .get("/seasons")
-
-        .then(res=>{
-
-            setSeasons(res.data);
-
-        });
+                <select
+                    value={race}
+                    onChange={
+                        e => setRace(
+                            e.target.value
+                        )
+                    }
+                >
+                    <option value="Monaco">
+                        Monaco
+                    </option>
+                </select>
 
 
-    },[]);
+                <select
+                    value={session}
+                    onChange={
+                        e => setSession(
+                            e.target.value
+                        )
+                    }
+                >
+                    <option value="FP1">
+                        Essais Libres 1
+                    </option>
+
+                    <option value="FP2">
+                        Essais Libres 2
+                    </option>
+
+                    <option value="FP3">
+                        Essais Libres 3
+                    </option>
+
+                    <option value="Q">
+                        Qualifications
+                    </option>
+
+                    <option value="R">
+                        Course
+                    </option>
+                </select>
 
 
+                <select
+                    value={driver1}
+                    onChange={
+                        e => setDriver1(
+                            e.target.value
+                        )
+                    }
+                >
+                    <option value="LEC">
+                        Charles Leclerc
+                    </option>
+
+                    <option value="VER">
+                        Max Verstappen
+                    </option>
+
+                    <option value="NOR">
+                        Lando Norris
+                    </option>
+                </select>
 
 
+                <select
+                    value={driver2}
+                    onChange={
+                        e => setDriver2(
+                            e.target.value
+                        )
+                    }
+                >
+                    <option value="VER">
+                        Max Verstappen
+                    </option>
+
+                    <option value="LEC">
+                        Charles Leclerc
+                    </option>
+
+                    <option value="NOR">
+                        Lando Norris
+                    </option>
+                </select>
+
+            </div>
 
 
-    // =========================
-    // Chargement GP
-    // =========================
+            {/* ========================= */}
+            {/* TELEMETRIE */}
+            {/* ========================= */}
+
+            <h2>
+                📡 Télémétrie {driver1}
+            </h2>
 
 
-    useEffect(()=>{
+            {
+                telemetry.length === 0 ? (
+
+                    <p>
+                        Chargement de la télémétrie...
+                    </p>
+
+                ) : (
+
+                    <>
+                        <Plot
+
+                            data={[
+                                {
+                                    x: telemetryDistance,
+                                    y: telemetrySpeed,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: "Vitesse"
+                                },
+
+                                {
+                                    x: telemetryDistance,
+                                    y: telemetryThrottle,
+                                    type: "scatter",
+                                    mode: "lines",
+                                    name: "Accélérateur"
+                                }
+                            ]}
+
+                            layout={{
+                                title: "Télémétrie",
+                                autosize: true,
+                                height: 450,
+
+                                xaxis: {
+                                    title: "Distance"
+                                },
+
+                                yaxis: {
+                                    title: "Valeur"
+                                }
+                            }}
+
+                            style={{
+                                width: "100%"
+                            }}
+
+                            useResizeHandler={true}
+
+                        />
 
 
-        api
-        .get(`/races/${selectedSeason}`)
-
-        .then(res=>{
-
-
-            setRaces(res.data);
+                        <h2>
+                            🗺️ Circuit
+                        </h2>
 
 
+                        <Plot
 
-            if(res.data.includes("Monaco")){
+                            data={[
+                                {
+                                    x: telemetryX,
+                                    y: telemetryY,
 
-                setSelectedRace("Monaco");
+                                    mode: "lines",
 
+                                    type: "scatter",
+
+                                    name: driver1
+                                }
+                            ]}
+
+                            layout={{
+                                title:
+                                    `Tour rapide ${driver1}`,
+
+                                autosize: true,
+
+                                height: 600,
+
+                                xaxis: {
+                                    visible: false
+                                },
+
+                                yaxis: {
+                                    visible: false,
+                                    scaleanchor: "x"
+                                }
+                            }}
+
+                            style={{
+                                width: "100%"
+                            }}
+
+                            useResizeHandler={true}
+
+                        />
+
+                    </>
+
+                )
             }
-            else{
 
-                setSelectedRace(res.data[0]);
 
+            {/* ========================= */}
+            {/* DOMINATION */}
+            {/* ========================= */}
+
+            <h2>
+                🏁 Domination {driver1} vs {driver2}
+            </h2>
+
+
+            {
+                dominance.length === 0 ? (
+
+                    <p>
+                        Chargement de la domination...
+                    </p>
+
+                ) : (
+
+                    <>
+
+                        <p>
+                            🟢 {driver1} plus rapide :
+                            {" "}
+                            {driver1Dominance.length}
+                            {" "}
+                            points
+                        </p>
+
+                        <p>
+                            🔴 {driver2} plus rapide :
+                            {" "}
+                            {driver2Dominance.length}
+                            {" "}
+                            points
+                        </p>
+
+
+                        <Plot
+
+                            data={[
+
+                                {
+                                    x:
+                                        driver1Dominance.map(
+                                            p => p.x
+                                        ),
+
+                                    y:
+                                        driver1Dominance.map(
+                                            p => p.y
+                                        ),
+
+                                    mode: "markers",
+
+                                    type: "scatter",
+
+                                    name: driver1,
+
+                                    marker: {
+                                        size: 5
+                                    }
+                                },
+
+                                {
+                                    x:
+                                        driver2Dominance.map(
+                                            p => p.x
+                                        ),
+
+                                    y:
+                                        driver2Dominance.map(
+                                            p => p.y
+                                        ),
+
+                                    mode: "markers",
+
+                                    type: "scatter",
+
+                                    name: driver2,
+
+                                    marker: {
+                                        size: 5
+                                    }
+                                }
+
+                            ]}
+
+                            layout={{
+                                title:
+                                    `${driver1} vs ${driver2}`,
+
+                                autosize: true,
+
+                                height: 600,
+
+                                xaxis: {
+                                    visible: false
+                                },
+
+                                yaxis: {
+                                    visible: false,
+                                    scaleanchor: "x"
+                                }
+                            }}
+
+                            style={{
+                                width: "100%"
+                            }}
+
+                            useResizeHandler={true}
+
+                        />
+
+                    </>
+
+                )
             }
 
+        </div>
 
-        });
-
-
-    },[
-        selectedSeason
-    ]);
-
-
-
-
-
-
-
-    // =========================
-    // Circuit
-    // =========================
-
-
-
-
-
-    // =========================
-    // Carte domination
-    // =========================
-
-
-
-
-
-
-
-
-return (
-
-<div>
-
-<Navbar
-
-page={page}
-
-setPage={setPage}
-
-/>
-<SessionSelector
-
-seasons={seasons}
-
-races={races}
-
-sessions={sessions}
-
-drivers={drivers}
-
-
-selectedSeason={selectedSeason}
-setSelectedSeason={setSelectedSeason}
-
-
-selectedRace={selectedRace}
-setSelectedRace={setSelectedRace}
-
-
-session={session}
-setSession={setSession}
-
-
-driver1={driver1}
-setDriver1={setDriver1}
-
-
-driver2={driver2}
-setDriver2={setDriver2}
-
-/>
-
-{
-page==="dashboard" &&
-
-<Dashboard
-
-stats1={stats1}
-stats2={stats2}
-laps1={laps1}
-laps2={laps2}
-driver1={driver1}
-driver2={driver2}
-track={track}
-dominance={dominance}
-telemetry={telemetry}
-telemetryIndex={telemetryIndex}
-longRun={longRun}
-formulaInsight={formulaInsight}
-session={session}
-
-/>
+    );
 
 }
 
-
-
-{
-page==="telemetry" &&
-
-<Telemetry />
-
-}
-
-
-
-{
-page==="insight" &&
-
-<FormulaInsightPages />
-
-}
-
-
-{
-page==="race" &&
-
-<RaceAnalysis />
-
-}
-{
-page==="telemetry" &&
-
-<TelemetryPage
-
-telemetry={telemetry}
-
-telemetryIndex={telemetryIndex}
-
-setTelemetryIndex={setTelemetryIndex}
-
-driver={driver1}
-
-/>
-
-}
-</div>
-
-);
-
-}
 
 export default App;

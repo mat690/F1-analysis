@@ -1,64 +1,55 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-
 export default function useDominance(
     season,
     race,
     session,
     driver1,
     driver2
-){
+) {
+    const [dominance, setDominance] = useState([]);
 
-    const [dominance,setDominance] = useState([]);
+    useEffect(() => {
 
+        async function loadDominance() {
 
+            try {
 
-    useEffect(()=>{
-
-
-        async function loadDominance(){
-
-
-            try{
-
-
-                const response =
-                await api.get(
-
-                `/dominance/${season}/${race}/${session}/${driver1}/${driver2}`
-
+                const response = await api.get(
+                    `/dominance/${season}/${race}/${session}/${driver1}/${driver2}`
                 );
 
+                const points = Array.isArray(response.data?.points)
+                    ? response.data.points
+                    : [];
 
-                setDominance(response.data);
+                setDominance(points);
 
+            } catch (error) {
 
-
-            }
-            catch(error){
-
-
-                console.log(
+                console.error(
                     "Dominance error:",
                     error
                 );
 
-
                 setDominance([]);
-
 
             }
 
-
         }
 
+        if (
+            season &&
+            race &&
+            session &&
+            driver1 &&
+            driver2
+        ) {
+            loadDominance();
+        }
 
-        loadDominance();
-
-
-
-    },[
+    }, [
         season,
         race,
         session,
@@ -66,9 +57,5 @@ export default function useDominance(
         driver2
     ]);
 
-
-
     return dominance;
-
-
 }

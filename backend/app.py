@@ -8,6 +8,7 @@ from routes.pitstops import pitstops_bp
 from routes.weather import weather_bp
 from routes.trackstatus import trackstatus_bp
 from routes.dominance import dominance_bp
+from routes.sector_comparison import sector_bp
 app = Flask(__name__)
 
 CORS(app)
@@ -36,6 +37,7 @@ app.register_blueprint(
 app.register_blueprint(
     dominance_bp
 )
+app.register_blueprint(sector_bp)
 @app.route("/")
 def home():
 
