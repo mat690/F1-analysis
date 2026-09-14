@@ -1,26 +1,123 @@
-import { useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
+
 import Plot from "react-plotly.js";
 
 import useTelemetry from "./hooks/useTelemetry";
 import useDominance from "./hooks/useDominance";
+import useRaces from "./hooks/useRaces";
+import useDrivers from "./hooks/useDrivers";
+
 import DominanceMap from "./components/DominanceMap";
+
 
 function App() {
 
     // =========================
-    // Sélections utilisateur
+    // ÉTATS
     // =========================
 
-  const [season, setSeason] = useState(2024);
-const [race, setRace] = useState("Monaco");
-const [session, setSession] = useState("R");
+    const [season, setSeason] = useState(2024);
 
-const [driver1, setDriver1] = useState("LEC");
-const [driver2, setDriver2] = useState("VER");
+    const [race, setRace] = useState(
+        "Monaco Grand Prix"
+    );
+
+    const [session, setSession] = useState("R");
+
+    const [driver1, setDriver1] = useState("LEC");
+    const [driver2, setDriver2] = useState("VER");
 
 
     // =========================
-    // Chargement télémétrie
+    // DONNÉES DYNAMIQUES
+    // =========================
+
+    const races = useRaces(season);
+
+    const drivers = useDrivers(
+        season,
+        race,
+        session
+    );
+
+
+    // =========================
+    // VÉRIFICATION GRAND PRIX
+    // =========================
+
+    useEffect(() => {
+
+        if (races.length === 0) {
+            return;
+        }
+
+        if (!races.includes(race)) {
+            setRace(races[0]);
+        }
+
+    }, [
+        races,
+        race
+    ]);
+
+
+    // =========================
+    // VÉRIFICATION PILOTES
+    // =========================
+
+    useEffect(() => {
+
+        if (drivers.length === 0) {
+            return;
+        }
+
+        const codes = drivers.map(
+            driver => driver.code
+        );
+
+
+        let newDriver1 = driver1;
+        let newDriver2 = driver2;
+
+
+        // Pilote 1 invalide
+        if (!codes.includes(newDriver1)) {
+            newDriver1 = drivers[0].code;
+            setDriver1(newDriver1);
+        }
+
+
+        // Pilote 2 invalide
+        if (
+            !codes.includes(newDriver2) ||
+            newDriver2 === newDriver1
+        ) {
+
+            const secondDriver =
+                drivers.find(
+                    driver =>
+                        driver.code !== newDriver1
+                );
+
+            if (secondDriver) {
+                setDriver2(
+                    secondDriver.code
+                );
+            }
+        }
+
+    }, [
+        drivers,
+        driver1,
+        driver2
+    ]);
+
+
+    // =========================
+    // TÉLÉMÉTRIE PILOTE 1
     // =========================
 
     const {
@@ -33,6 +130,10 @@ const [driver2, setDriver2] = useState("VER");
     );
 
 
+    // =========================
+    // TÉLÉMÉTRIE PILOTE 2
+    // =========================
+
     const {
         telemetry: telemetry2
     } = useTelemetry(
@@ -44,7 +145,7 @@ const [driver2, setDriver2] = useState("VER");
 
 
     // =========================
-    // Chargement domination
+    // DOMINATION
     // =========================
 
     const dominance = useDominance(
@@ -57,57 +158,53 @@ const [driver2, setDriver2] = useState("VER");
 
 
     // =========================
-    // Données pilote 1
+    // DONNÉES GRAPHIQUES
     // =========================
 
     const distance1 = telemetry1.map(
-        p => p.distance
+        point => point.distance
     );
 
     const speed1 = telemetry1.map(
-        p => p.vitesse
+        point => point.vitesse
     );
 
     const throttle1 = telemetry1.map(
-        p => p.accelerateur
+        point => point.accelerateur
     );
 
     const brake1 = telemetry1.map(
-        p => p.frein ? 100 : 0
+        point => point.frein ? 100 : 0
     );
 
     const drs1 = telemetry1.map(
-        p => p.drs
+        point => point.drs
     );
 
 
-    // =========================
-    // Données pilote 2
-    // =========================
-
     const distance2 = telemetry2.map(
-        p => p.distance
+        point => point.distance
     );
 
     const speed2 = telemetry2.map(
-        p => p.vitesse
+        point => point.vitesse
     );
 
     const throttle2 = telemetry2.map(
-        p => p.accelerateur
+        point => point.accelerateur
     );
 
     const brake2 = telemetry2.map(
-        p => p.frein ? 100 : 0
+        point => point.frein ? 100 : 0
     );
 
     const drs2 = telemetry2.map(
-        p => p.drs
+        point => point.drs
     );
 
 
     // =========================
-    // Sécurité affichage
+    // CHARGEMENT
     // =========================
 
     const telemetryAvailable =
@@ -130,179 +227,285 @@ const [driver2, setDriver2] = useState("VER");
             {/* TITRE */}
             {/* ========================= */}
 
-            <h1>
+            <h1
+                style={{
+                    textAlign: "center"
+                }}
+            >
                 🏎️ F1 Analysis
             </h1>
-<div
-    style={{
-        display: "flex",
-        gap: "15px",
-        flexWrap: "wrap",
-        marginBottom: "25px"
-    }}
->
-
-    {/* SAISON */}
-
-    <div>
-        <label>Saison</label>
-
-        <br />
-
-        <select
-            value={season}
-            onChange={(e) =>
-                setSeason(Number(e.target.value))
-            }
-        >
-            <option value={2024}>2024</option>
-            <option value={2023}>2023</option>
-            <option value={2022}>2022</option>
-        </select>
-    </div>
 
 
-    {/* GRAND PRIX */}
+            {/* ========================= */}
+            {/* FILTRES */}
+            {/* ========================= */}
 
-    <div>
-        <label>Grand Prix</label>
+            <div
+                style={{
+                    display: "flex",
+                    gap: "15px",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    marginBottom: "25px"
+                }}
+            >
 
-        <br />
+                {/* SAISON */}
 
-        <select
-            value={race}
-            onChange={(e) =>
-                setRace(e.target.value)
-            }
-        >
-            <option value="Monaco">
-                Monaco
-            </option>
+                <div>
 
-            <option value="Monza">
-                Italie - Monza
-            </option>
+                    <label>
+                        Saison
+                    </label>
 
-            <option value="Silverstone">
-                Grande-Bretagne
-            </option>
+                    <br />
 
-            <option value="Spa">
-                Belgique - Spa
-            </option>
+                    <select
+                        value={season}
+                        onChange={(e) =>
+                            setSeason(
+                                Number(
+                                    e.target.value
+                                )
+                            )
+                        }
+                    >
+                        <option value={2024}>
+                            2024
+                        </option>
 
-            <option value="Suzuka">
-                Japon - Suzuka
-            </option>
-        </select>
-    </div>
+                        <option value={2023}>
+                            2023
+                        </option>
 
+                        <option value={2022}>
+                            2022
+                        </option>
 
-    {/* SESSION */}
+                    </select>
 
-    <div>
-        <label>Session</label>
-
-        <br />
-
-        <select
-            value={session}
-            onChange={(e) =>
-                setSession(e.target.value)
-            }
-        >
-            <option value="FP1">
-                Essais libres 1
-            </option>
-
-            <option value="FP2">
-                Essais libres 2
-            </option>
-
-            <option value="FP3">
-                Essais libres 3
-            </option>
-
-            <option value="Q">
-                Qualifications
-            </option>
-
-            <option value="R">
-                Course
-            </option>
-        </select>
-    </div>
+                </div>
 
 
-    {/* PILOTE 1 */}
+                {/* GRAND PRIX */}
 
-    <div>
-        <label>Pilote 1</label>
+                <div>
 
-        <br />
+                    <label>
+                        Grand Prix
+                    </label>
 
-        <select
-            value={driver1}
-            onChange={(e) =>
-                setDriver1(e.target.value)
-            }
-        >
-            <option value="LEC">Charles Leclerc</option>
-            <option value="VER">Max Verstappen</option>
-            <option value="NOR">Lando Norris</option>
-            <option value="PIA">Oscar Piastri</option>
-            <option value="HAM">Lewis Hamilton</option>
-            <option value="RUS">George Russell</option>
-            <option value="SAI">Carlos Sainz</option>
-            <option value="ALO">Fernando Alonso</option>
-        </select>
-    </div>
+                    <br />
+
+                    <select
+                        value={race}
+                        onChange={(e) =>
+                            setRace(
+                                e.target.value
+                            )
+                        }
+                    >
+
+                        {races.map(
+                            raceName => (
+
+                                <option
+                                    key={raceName}
+                                    value={raceName}
+                                >
+                                    {raceName}
+                                </option>
+
+                            )
+                        )}
+
+                    </select>
+
+                </div>
 
 
-    {/* PILOTE 2 */}
+                {/* SESSION */}
 
-    <div>
-        <label>Pilote 2</label>
+                <div>
 
-        <br />
+                    <label>
+                        Session
+                    </label>
 
-        <select
-            value={driver2}
-            onChange={(e) =>
-                setDriver2(e.target.value)
-            }
-        >
-            <option value="VER">Max Verstappen</option>
-            <option value="LEC">Charles Leclerc</option>
-            <option value="NOR">Lando Norris</option>
-            <option value="PIA">Oscar Piastri</option>
-            <option value="HAM">Lewis Hamilton</option>
-            <option value="RUS">George Russell</option>
-            <option value="SAI">Carlos Sainz</option>
-            <option value="ALO">Fernando Alonso</option>
-        </select>
-    </div>
+                    <br />
 
-</div>
-            <p>
-                Comparaison de télémétrie :
-                {" "}
-                <strong>{driver1}</strong>
-                {" "}
-                vs
-                {" "}
-                <strong>{driver2}</strong>
-            </p>
+                    <select
+                        value={session}
+                        onChange={(e) =>
+                            setSession(
+                                e.target.value
+                            )
+                        }
+                    >
 
-            <p>
-                Grand Prix :
-                {" "}
-                <strong>{race}</strong>
-                {" "}
-                - Saison {season}
-                {" "}
-                - Session {session}
-            </p>
+                        <option value="FP1">
+                            Essais libres 1
+                        </option>
+
+                        <option value="FP2">
+                            Essais libres 2
+                        </option>
+
+                        <option value="FP3">
+                            Essais libres 3
+                        </option>
+
+                        <option value="Q">
+                            Qualifications
+                        </option>
+
+                        <option value="R">
+                            Course
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                {/* PILOTE 1 */}
+
+                <div>
+
+                    <label>
+                        Pilote 1
+                    </label>
+
+                    <br />
+
+                    <select
+                        value={driver1}
+                        onChange={(e) =>
+                            setDriver1(
+                                e.target.value
+                            )
+                        }
+                    >
+
+                        {drivers.map(
+                            driver => (
+
+                                <option
+                                    key={driver.code}
+                                    value={driver.code}
+                                    disabled={
+                                        driver.code ===
+                                        driver2
+                                    }
+                                >
+                                    {driver.nom}
+                                </option>
+
+                            )
+                        )}
+
+                    </select>
+
+                </div>
+
+
+                {/* PILOTE 2 */}
+
+                <div>
+
+                    <label>
+                        Pilote 2
+                    </label>
+
+                    <br />
+
+                    <select
+                        value={driver2}
+                        onChange={(e) =>
+                            setDriver2(
+                                e.target.value
+                            )
+                        }
+                    >
+
+                        {drivers.map(
+                            driver => (
+
+                                <option
+                                    key={driver.code}
+                                    value={driver.code}
+                                    disabled={
+                                        driver.code ===
+                                        driver1
+                                    }
+                                >
+                                    {driver.nom}
+                                </option>
+
+                            )
+                        )}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            {/* ========================= */}
+            {/* INFOS */}
+            {/* ========================= */}
+
+            <div
+                style={{
+                    textAlign: "center"
+                }}
+            >
+
+                <p>
+
+                    Comparaison de télémétrie :
+
+                    {" "}
+
+                    <strong>
+                        {driver1}
+                    </strong>
+
+                    {" "}
+
+                    vs
+
+                    {" "}
+
+                    <strong>
+                        {driver2}
+                    </strong>
+
+                </p>
+
+
+                <p>
+
+                    Grand Prix :
+
+                    {" "}
+
+                    <strong>
+                        {race}
+                    </strong>
+
+                    {" "}
+
+                    - Saison {season}
+
+                    {" "}
+
+                    - Session {session}
+
+                </p>
+
+            </div>
 
 
             <hr />
@@ -314,53 +517,55 @@ const [driver2, setDriver2] = useState("VER");
 
             {!telemetryAvailable && (
 
-                <p>
-                    Chargement des données télémétriques...
+                <p
+                    style={{
+                        textAlign: "center"
+                    }}
+                >
+                    Chargement des données FastF1...
                 </p>
 
             )}
 
 
             {/* ========================= */}
-            {/* VITESSE */}
+            {/* GRAPHIQUES */}
             {/* ========================= */}
 
             {telemetryAvailable && (
 
                 <>
 
-                    <h2>
+                    {/* VITESSE */}
+
+                    <h2
+                        style={{
+                            textAlign: "center"
+                        }}
+                    >
                         Vitesse
                     </h2>
 
                     <Plot
 
                         data={[
-
                             {
                                 x: distance1,
                                 y: speed1,
-
                                 type: "scatter",
                                 mode: "lines",
-
                                 name: driver1
                             },
-
                             {
                                 x: distance2,
                                 y: speed2,
-
                                 type: "scatter",
                                 mode: "lines",
-
                                 name: driver2
                             }
-
                         ]}
 
                         layout={{
-
                             title:
                                 `Vitesse ${driver1} vs ${driver2}`,
 
@@ -372,6 +577,8 @@ const [driver2, setDriver2] = useState("VER");
                                 title: "Vitesse (km/h)"
                             },
 
+                            autosize: true,
+
                             height: 450,
 
                             margin: {
@@ -380,7 +587,6 @@ const [driver2, setDriver2] = useState("VER");
                                 t: 60,
                                 b: 60
                             }
-
                         }}
 
                         style={{
@@ -396,42 +602,36 @@ const [driver2, setDriver2] = useState("VER");
                     />
 
 
-                    {/* ========================= */}
                     {/* ACCÉLÉRATEUR */}
-                    {/* ========================= */}
 
-                    <h2>
+                    <h2
+                        style={{
+                            textAlign: "center"
+                        }}
+                    >
                         Accélérateur
                     </h2>
 
                     <Plot
 
                         data={[
-
                             {
                                 x: distance1,
                                 y: throttle1,
-
                                 type: "scatter",
                                 mode: "lines",
-
                                 name: driver1
                             },
-
                             {
                                 x: distance2,
                                 y: throttle2,
-
                                 type: "scatter",
                                 mode: "lines",
-
                                 name: driver2
                             }
-
                         ]}
 
                         layout={{
-
                             title:
                                 `Accélérateur ${driver1} vs ${driver2}`,
 
@@ -444,6 +644,8 @@ const [driver2, setDriver2] = useState("VER");
                                 range: [0, 105]
                             },
 
+                            autosize: true,
+
                             height: 350,
 
                             margin: {
@@ -452,7 +654,6 @@ const [driver2, setDriver2] = useState("VER");
                                 t: 60,
                                 b: 60
                             }
-
                         }}
 
                         style={{
@@ -468,42 +669,36 @@ const [driver2, setDriver2] = useState("VER");
                     />
 
 
-                    {/* ========================= */}
                     {/* FREIN */}
-                    {/* ========================= */}
 
-                    <h2>
+                    <h2
+                        style={{
+                            textAlign: "center"
+                        }}
+                    >
                         Frein
                     </h2>
 
                     <Plot
 
                         data={[
-
                             {
                                 x: distance1,
                                 y: brake1,
-
                                 type: "scatter",
                                 mode: "lines",
-
                                 name: driver1
                             },
-
                             {
                                 x: distance2,
                                 y: brake2,
-
                                 type: "scatter",
                                 mode: "lines",
-
                                 name: driver2
                             }
-
                         ]}
 
                         layout={{
-
                             title:
                                 `Freinage ${driver1} vs ${driver2}`,
 
@@ -526,6 +721,8 @@ const [driver2, setDriver2] = useState("VER");
                                 ]
                             },
 
+                            autosize: true,
+
                             height: 300,
 
                             margin: {
@@ -534,7 +731,6 @@ const [driver2, setDriver2] = useState("VER");
                                 t: 60,
                                 b: 60
                             }
-
                         }}
 
                         style={{
@@ -550,42 +746,36 @@ const [driver2, setDriver2] = useState("VER");
                     />
 
 
-                    {/* ========================= */}
                     {/* DRS */}
-                    {/* ========================= */}
 
-                    <h2>
+                    <h2
+                        style={{
+                            textAlign: "center"
+                        }}
+                    >
                         DRS
                     </h2>
 
                     <Plot
 
                         data={[
-
                             {
                                 x: distance1,
                                 y: drs1,
-
                                 type: "scatter",
                                 mode: "lines",
-
                                 name: driver1
                             },
-
                             {
                                 x: distance2,
                                 y: drs2,
-
                                 type: "scatter",
                                 mode: "lines",
-
                                 name: driver2
                             }
-
                         ]}
 
                         layout={{
-
                             title:
                                 `DRS ${driver1} vs ${driver2}`,
 
@@ -597,6 +787,8 @@ const [driver2, setDriver2] = useState("VER");
                                 title: "Valeur DRS"
                             },
 
+                            autosize: true,
+
                             height: 300,
 
                             margin: {
@@ -605,7 +797,6 @@ const [driver2, setDriver2] = useState("VER");
                                 t: 60,
                                 b: 60
                             }
-
                         }}
 
                         style={{
@@ -629,19 +820,14 @@ const [driver2, setDriver2] = useState("VER");
 
 
             {/* ========================= */}
-            {/* DOMINATION */}
+            {/* CARTE DE DOMINATION */}
             {/* ========================= */}
 
             <DominanceMap
-
                 data={dominance}
-
                 driver1={driver1}
-
                 driver2={driver2}
-
             />
-
 
         </div>
 
