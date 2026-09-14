@@ -151,14 +151,17 @@ function App() {
     // DOMINATION
     // =========================
 
-    const dominance = useDominance(
-        season,
-        race,
-        session,
-        driver1,
-        driver2
-    );
-
+const {
+    dominance,
+    loading: dominanceLoading,
+    error: dominanceError
+} = useDominance(
+    season,
+    race,
+    session,
+    driver1,
+    driver2
+);
 
     // =========================
     // DONNÉES GRAPHIQUES
@@ -843,12 +846,43 @@ const telemetryAvailable =
             {/* ========================= */}
             {/* CARTE DE DOMINATION */}
             {/* ========================= */}
+{dominanceLoading && (
 
-            <DominanceMap
-                data={dominance}
-                driver1={driver1}
-                driver2={driver2}
-            />
+    <p
+        style={{
+            textAlign: "center"
+        }}
+    >
+        ⏳ Calcul de la domination {driver1} vs {driver2}...
+    </p>
+
+)}
+
+
+{dominanceError && !dominanceLoading && (
+
+    <p
+        style={{
+            textAlign: "center"
+        }}
+    >
+        ⚠️ {dominanceError}
+    </p>
+
+)}
+
+
+{!dominanceLoading &&
+    !dominanceError &&
+    dominance.length > 0 && (
+
+        <DominanceMap
+            data={dominance}
+            driver1={driver1}
+            driver2={driver2}
+        />
+
+    )}
 
         </div>
 

@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
+
 import api from "../services/api";
+
 
 export default function useDominance(
     season,
@@ -8,11 +13,23 @@ export default function useDominance(
     driver1,
     driver2
 ) {
+
     const [dominance, setDominance] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
 
     useEffect(() => {
 
+        let cancelled = false;
+
+
         async function loadDominance() {
+
+            setDominance([]);
+            setLoading(true);
+            setError(null);
+
 
             try {
 
@@ -20,34 +37,75 @@ export default function useDominance(
                     `/dominance/${season}/${race}/${session}/${driver1}/${driver2}`
                 );
 
-                const points = Array.isArray(response.data?.points)
-                    ? response.data.points
-                    : [];
+
+                if (cancelled) {
+                    return;
+                }
+
+
+                const points =
+                    Array.isArray(response.data?.points)
+                        ? response.data.points
+                        : [];
+
 
                 setDominance(points);
 
-            } catch (error) {
+
+                if (points.length === 0) {
+                    setError(
+                        "Aucune donnée de domination disponible."
+                    );
+                }
+
+
+            } catch (err) {
+
+                if (cancelled) {
+                    return;
+                }
+
 
                 console.error(
-                    "Dominance error:",
-                    error
+                    "Erreur domination :",
+                    err
                 );
 
+
                 setDominance([]);
+
+                setError(
+                    "Impossible de charger la carte de domination."
+                );
+
+
+            } finally {
+
+                if (!cancelled) {
+                    setLoading(false);
+                }
 
             }
 
         }
+
 
         if (
             season &&
             race &&
             session &&
             driver1 &&
-            driver2
+            driver2 &&
+            driver1 !== driver2
         ) {
             loadDominance();
         }
+
+
+        return () => {
+            cancelled = true;
+        };
+
 
     }, [
         season,
@@ -57,5 +115,10 @@ export default function useDominance(
         driver2
     ]);
 
-    return dominance;
+
+    return {
+        dominance,
+        loading,
+        error
+    };
 }
