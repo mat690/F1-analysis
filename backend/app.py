@@ -13,6 +13,7 @@ from routes.races import races_bp
 from routes.drivers import drivers_bp
 from routes.practice import practice_bp
 from routes.qualifying import qualifying_bp
+from routes.race_analysis import race_analysis_bp
 app = Flask(__name__)
 
 CORS(app)
@@ -46,6 +47,7 @@ app.register_blueprint(sector_bp)
 app.register_blueprint(drivers_bp)
 app.register_blueprint(practice_bp)
 app.register_blueprint(qualifying_bp)
+app.register_blueprint(race_analysis_bp)
 @app.route("/")
 def home():
 
