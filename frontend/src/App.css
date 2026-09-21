@@ -976,3 +976,63 @@ select:focus {
     }
 
 }
+/* ========================================
+   QUALIFICATIONS
+   ======================================== */
+
+.qualifying-analysis {
+    width: 100%;
+    min-width: 0;
+}
+
+.qualifying-stats-section,
+.qualifying-sectors-section {
+    width: 100%;
+    margin-top: 24px;
+}
+
+.qualifying-stats-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.qualifying-sector-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+
+/* TABLETTE */
+
+@media (max-width: 1100px) {
+
+    .qualifying-stats-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* MOBILE */
+
+@media (max-width: 800px) {
+
+    .qualifying-sector-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 550px) {
+
+    .qualifying-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
