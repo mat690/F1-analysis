@@ -11,6 +11,7 @@ from routes.dominance import dominance_bp
 from routes.sector_comparison import sector_bp
 from routes.races import races_bp
 from routes.drivers import drivers_bp
+from routes.practice import practice_bp
 app = Flask(__name__)
 
 CORS(app)
@@ -42,6 +43,7 @@ app.register_blueprint(
 app.register_blueprint(races_bp)
 app.register_blueprint(sector_bp)
 app.register_blueprint(drivers_bp)
+app.register_blueprint(practice_bp)
 @app.route("/")
 def home():
 

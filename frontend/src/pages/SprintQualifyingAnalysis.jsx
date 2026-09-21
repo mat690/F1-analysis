@@ -1,7 +1,7 @@
-function RaceAnalysis() {
+function SprintQualifyingAnalysis() {
     return (
         <div className="card">
-            <h2>🏆 Course</h2>
+            <h2>⚡ Qualifications Sprint</h2>
 
             <p>
                 Module en cours de développement.
@@ -10,4 +10,4 @@ function RaceAnalysis() {
     );
 }
 
-export default RaceAnalysis;
+export default SprintQualifyingAnalysis;
